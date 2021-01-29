@@ -28,14 +28,15 @@ html, body {
   padding: 0;
   height: 100%;
   overflow: hidden;
-}
 
-#app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+#app {
 }
 
 #nav {
@@ -56,6 +57,11 @@ html, body {
   height: 60px;
   background: #666;
   text-align: center;
+  color: #d9d9d9;
+  font-size: 12px;
+  line-height: 60px;
+  user-select: none;
+  box-sizing: border-box;
 }
 
 .comp-moving {

@@ -1,6 +1,7 @@
 <template>
   <div id="workspace">
     <div class="bem-tools">
+      <!-- 滑动的容器 -->
       <div class="outline hovered-node" :style="{
           display: !isDrag && hover.display ? 'block' : 'none',
           width: hover.width + 'px',
@@ -13,6 +14,8 @@
           </div>
         </div>
       </div>
+
+      <!-- 选中的容器 -->
       <div ref="outline-selected" class="outline selected-node" :style="{
           display: !isDrag && outline.display ? 'block' : 'none',
           width: outline.width + 'px',
@@ -27,6 +30,15 @@
       </div>
     </div>
 
+    <!-- 占位符号 -->
+    <div class="bem-placeholder" :style="{
+          display: placeholderInfo.display ? 'block' : 'none',
+          width: placeholder.width + 'px',
+          height: placeholder.height + 'px',
+          transform: `translate(${placeholder.x}px, ${placeholder.y - frame.scroll}px)`,
+        }">
+
+    </div>
     <iframe ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe>
     <!-- <div class="page" ref="pageRoot"> -->
     <!-- </div> -->
@@ -35,7 +47,8 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
+/* eslint-disable */
+import { mapMutations, mapState } from 'vuex';
 import { debounce } from '../../../common/utils';
 // import Vue from 'vue';
 // import Home from '../../template/Home.vue';
@@ -58,6 +71,12 @@ export default {
         x: 0,
         y: 0,
       },
+      placeholder: {
+        width: 100,
+        height: 2,
+        x: 0,
+        y: 0,
+      },
       frame: {
         scroll: 0,
       },
@@ -65,10 +84,14 @@ export default {
       isDrag: false,
     };
   },
+  computed: {
+    ...mapState({
+      placeholderInfo: (state) => state.workspace.placeholder,
+    })
+  },
   methods: {
-    ...mapMutations(['setBlockData']),
+    ...mapMutations(['setBlockData', 'setPlaceholder', 'showPlaceholder']),
     onFrameScroll: debounce(function (data) {
-      console.log(data);
       this.frame.scroll = data.scrollTop;
     }, 16),
     drawOutline(data) {
@@ -83,6 +106,7 @@ export default {
       this.setBlockData(data.blockInfo);
     },
     hoverBlock(data) {
+      console.log(data);
       if (this.isDrag) { return; }
       this.hover.display = true;
       this.hover.width = data.rect.width;
@@ -92,7 +116,35 @@ export default {
 
       this.hoverInfo = data.blockInfo;
     },
+    updatePlaceholder(data) {
+      this.showPlaceholder();
+      // const clientX = data.pointer.clientX;
+      const clientY = data.pointer.clientY;
+      const rect = data.rect;
+      const pointToElement = clientY - rect.top;
+      let direction;
+      if (pointToElement < (rect.height / 2)) {
+        direction = 'top';
+        // place at top of current element
+        this.placeholder.y = rect.top - 10 + data.scrollTop;
+      } else {
+        direction = 'bottom';
+        // place at bottom of current element
+        this.placeholder.y = rect.top + rect.height + 10 + data.scrollTop;
+      }
+      this.placeholder.width = rect.width;
 
+      const placeholderInfo = {
+        blockInfo: data.blockInfo,
+        direction,
+      };
+      this.setPlaceholder(placeholderInfo);
+      // TODO save this information to vuex
+      // this.placeholderInfo = {
+      //   blockId: data.blockId,
+      //   direction,
+      // };
+    },
     receiveMessage(data) {
       switch (data.action) {
         case 'click_block':
@@ -113,9 +165,14 @@ export default {
           this.isDrag = true;
           break;
         case 'drag_end':
+          console.log(data);
           setTimeout(() => {
             this.isDrag = false;
-          }, 100);
+          }, 300);
+          break;
+        // 显示占位标记
+        case 'child_show_placeholder':
+          this.updatePlaceholder(data.data);
           break;
         default:
           console.log('Unhandled action: ', data.action);
@@ -183,6 +240,11 @@ export default {
     pointer-events: none;
     overflow: visible;
     line-height: 12px;
+  }
+
+  .bem-placeholder {
+    position: absolute;
+    background: #178df7;
   }
 
   .outline {

@@ -2,38 +2,67 @@
   <div class="left-side-bar">
     <div class="menu"></div>
     <div class="panel">
-      <div class="comp" ref="comp">List</div>
+      <div class="comp-list">
+        <div class="comp" data-component-id="List">List</div>
+        <div class="comp" data-component-id="Text">Text</div>
+        <div class="comp" data-component-id="Banner">Banner</div>
+        <div class="comp" data-component-id="HelloWorld">HelloWorld</div>
+      </div>
+      {{ componentToAdd.id }}
+      {{ JSON.stringify(placeholder) }}
     </div>
   </div>
 </template>
 
 <script>
+import { mapMutations, mapState } from 'vuex';
 /* eslint-disable */
 export default {
   data() {
     return {
       mNode: null,
+      componentToAdd: {
+        id: '',
+      },
+      isDebugMNode: false,
     };
   },
+  computed: {
+    ...mapState({
+      placeholder: (s) => s.workspace.placeholder,
+    }),
+  },
   methods: {
+    ...mapMutations(['hidePlaceholder', 'showPlaceholder']),
+    finishDrag() {
+      if (!this.isDebugMNode) {
+        this.mNode.remove();
+      }
+      this.hidePlaceholder();
+      // stop moving when mouse button is released:
+      document.onmouseup = null;
+      document.onmousemove = null;
+    },
     dragElement(elmnt) {
       var self = this;
       elmnt.onmousedown = dragMouseDown;
       let mNode;
+
+      // clone
       function cloneNode() {
-        mNode = elmnt.cloneNode();
+        mNode = elmnt.cloneNode(true);
+        mNode.style.display = "none";
         mNode.classList.add('comp-moving');
         document.body.appendChild(mNode);
         self.mNode = mNode;
       }
 
+      // start moving
       function dragMouseDown(e) {
         cloneNode();
-        e = e || window.event;
-        // e.preventDefault();
-        // get the mouse cursor position at startup:
-        // pos3 = e.clientX;
-        // pos4 = e.clientY;
+        self.componentToAdd.id = elmnt.getAttribute('data-component-id');
+
+        // clear events;
         document.onmouseup = closeDragElement;
         // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
@@ -42,34 +71,51 @@ export default {
         });
       }
 
+      // on move
       function elementDrag(e) {
         e = e || window.event;
+        mNode.style.display = 'block';
         // set the element's new position:
-        mNode.style.left = e.clientX + 20 + "px";
-        mNode.style.top = e.clientY + 20 + "px";
+        mNode.style.left = e.clientX + 5 + "px";
+        mNode.style.top = e.clientY + 5 + "px";
       }
 
       function closeDragElement() {
-        // stop moving when mouse button is released:
-        document.onmouseup = null;
-        document.onmousemove = null;
+        self.finishDrag();
         self.sendBridgeMessage({
           action: 'stop_tracking_mouse',
         });
       };
     },
+
+    // notifiy client
+    dispathComponentAddEvent() {
+      const data = {
+        targetBlockId: this.placeholder.blockInfo.id,
+        direction: this.placeholder.direction,
+        componentId: this.componentToAdd.id,
+      };
+
+      this.sendBridgeMessage({
+        action: 'add_component',
+        data,
+      })
+    },
   },
   mounted() {
     const self = this;
-    this.dragElement(this.$refs.comp);
+    document.querySelectorAll('.comp').forEach((item) => {
+      this.dragElement(item);
+    })
     console.log(this.$root);
     this.$root.$on('bridge-message', function(data) {
       if (data.action === 'drag_move') {
-        console.log(data);
-        self.mNode.style.left = data.data.clientX + 20 + 307 + 'px';
-        self.mNode.style.top = data.data.clientY + 20 + 56 + 'px';
+        self.mNode.style.left = data.data.clientX + 5 + 307 + 'px';
+        self.mNode.style.top = data.data.clientY + 5 + 56 + 'px';
       } else if (data.action === 'child_stop_tracking_mouse') {
-        document.onmousemove = null;
+        // only call back received from child will treated as success
+        self.finishDrag();
+        self.dispathComponentAddEvent();
       }
     })
   }
@@ -79,12 +125,13 @@ export default {
 <style lang="less">
 .left-side-bar {
   background-color: #404040;
-  height: 100%;
+  height: calc(100% - 35px);
   left: 0;
   top: 0;
   position: fixed;
   z-index: 32;
   display: flex;
+  top: 35px;
 
   .menu {
     width: 35px;
@@ -92,6 +139,7 @@ export default {
   }
 
   .panel {
+    padding-left: 6px;
     background: #404040;
     border: 1px solid #212121;
     color: #d9d9d9;
@@ -102,6 +150,7 @@ export default {
     width: 250px;
     height: 100%;
     position: relative;
+    box-sizing: border-box;
 
     &::before {
       background: #4d4d4d;
@@ -114,6 +163,15 @@ export default {
       top: 1px;
       width: 6px;
       pointer-events: auto;
+    }
+  }
+
+  .comp-list {
+    display: flex;
+    flex-wrap: wrap;
+
+    .comp {
+      margin: 10px;
     }
   }
 }
