@@ -6,7 +6,7 @@
         <div class="comp" data-component-id="List">List</div>
         <div class="comp" data-component-id="Text">Text</div>
         <div class="comp" data-component-id="Banner">Banner</div>
-        <div class="comp" data-component-id="HelloWorld">HelloWorld</div>
+        <div class="comp" data-component-id="Footer">Footer</div>
       </div>
       {{ componentToAdd.id }}
       {{ JSON.stringify(placeholder) }}
@@ -101,23 +101,25 @@ export default {
         data,
       })
     },
+    onReceiveMessage(data) {
+      switch (data.action) {
+        case 'drag_move':
+          this.mNode.style.left = data.data.clientX + 5 + 307 + 'px';
+          this.mNode.style.top = data.data.clientY + 5 + 56 + 'px';
+          break;
+        case 'child_stop_tracking_mouse':
+          // only call back received from child will treated as success
+          this.finishDrag();
+          this.dispathComponentAddEvent();
+          break;
+      }
+    }
   },
   mounted() {
-    const self = this;
     document.querySelectorAll('.comp').forEach((item) => {
       this.dragElement(item);
     })
-    console.log(this.$root);
-    this.$root.$on('bridge-message', function(data) {
-      if (data.action === 'drag_move') {
-        self.mNode.style.left = data.data.clientX + 5 + 307 + 'px';
-        self.mNode.style.top = data.data.clientY + 5 + 56 + 'px';
-      } else if (data.action === 'child_stop_tracking_mouse') {
-        // only call back received from child will treated as success
-        self.finishDrag();
-        self.dispathComponentAddEvent();
-      }
-    })
+    this.$root.$on('bridge-message', this.onReceiveMessage)
   }
 };
 </script>

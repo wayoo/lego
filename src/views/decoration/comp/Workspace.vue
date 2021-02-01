@@ -39,7 +39,7 @@
         }">
 
     </div>
-    <iframe ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe>
+    <iframe id="work-frame" ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe>
     <!-- <div class="page" ref="pageRoot"> -->
     <!-- </div> -->
     <!-- <div class="green block">asas</div> -->
@@ -103,7 +103,7 @@ export default {
       this.outline.y = data.rect.y + data.scrollTop;
 
       this.outlineInfo = data.blockInfo;
-      this.setBlockData(data.blockInfo);
+      // this.setBlockData(data.blockInfo);
     },
     hoverBlock(data) {
       console.log(data);
@@ -145,13 +145,13 @@ export default {
       //   direction,
       // };
     },
-    receiveMessage(data) {
+    onReceiveMessage(data) {
       switch (data.action) {
         case 'click_block':
-          this.drawOutline(data);
+          this.drawOutline(data.data);
           break;
         case 'hover_block':
-          this.hoverBlock(data);
+          this.hoverBlock(data.data);
           break;
         case 'unhover_block':
           console.log('un hover');
@@ -190,7 +190,7 @@ export default {
   },
   mounted() {
     this.$root.$on('bridge-message', (data) => {
-      this.receiveMessage(data);
+      this.onReceiveMessage(data);
     });
     this.$root.$on('send-bridge-message', (data) => {
       this.sendMessage(data);

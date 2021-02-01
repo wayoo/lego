@@ -1,20 +1,29 @@
 <template>
   <div class="right-side-bar">
     <el-tabs type="border-card">
-      <el-tab-pane label="用">
+      <el-tab-pane label="配置">
         <div class="property-editor">
-          <el-form ref="form" :model="form" label-width="80px">
+          <el-form ref="form" :model="form" :rules="rules"
+            @validate="onValidate"
+            label-width="80px">
             <el-form-item label="模块id">
-              <el-input :value="blockData.id" @input="updateMessage"></el-input>
+              <el-input v-model="form.id" disabled></el-input>
             </el-form-item>
-            <el-form-item label="模块名">
-              <el-input :value="blockData.name"></el-input>
+            <el-form-item label="模块名" prop="name">
+              <!-- <el-select v-model="form.name" placeholder="" prop="name">
+                <el-option label="List" value="List"></el-option>
+                <el-option label="Text" value="Text"></el-option>
+                <el-option label="Banner" value="Banner"></el-option>
+                <el-option label="Footer" value="Footer"></el-option>
+              </el-select> -->
+              <el-input v-model="form.name" ></el-input>
             </el-form-item>
             <el-form-item label="所属模块">
-              <el-input :value="blockData.module"></el-input>
+              <el-input v-model="form.module" disabled></el-input>
             </el-form-item>
-            <template v-if="content">
-              <el-input type="textarea" v-model="content"></el-input>
+            <template v-if="form.name === 'Text'">
+              <el-input type="textarea" rows="20" v-model="form.content"
+                @input="onContentChange"></el-input>
             </template>
           </el-form>
         </div>
@@ -22,14 +31,12 @@
       <el-tab-pane label="配">配置管理</el-tab-pane>
       <el-tab-pane label="角">角色管理</el-tab-pane>
     </el-tabs>
-          {{ JSON.stringify(blockData) }}
-
   </div>
 </template>
 
 <script>
 /* eslint-disable */
-import { mapState } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   data() {
@@ -37,7 +44,12 @@ export default {
 
     return {
       form: {
-
+        name: '',
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入模块名称', trigger: 'blur' },
+        ],
       },
     };
   },
@@ -47,11 +59,10 @@ export default {
     // }),
     blockData: {
       get () {
-        return this.$store.state.editor.blockData
+        return this.$store.state.editor.blockData;
       },
       set (value) {
-        console.log(value);
-        // this.$store.commit('updateMessage', value)
+        this.setBlockData(value);
       }
     },
     // how to use v-model with Vuex. Computed setter in action.
@@ -66,9 +77,46 @@ export default {
     },
   },
   methods: {
-    updateMessage(val) {
-      console.log(val)
-    }
+    ...mapMutations(['setBlockData']),
+    ...mapActions(['syncBlockData']),
+    onValidate(prop, valid, errTip) {
+      if (valid) {
+        // update to view
+        const data = {};
+        data.key = prop;
+        data.value = this.form[prop];
+        this.syncBlockData(data);
+      } else {
+        // restore to valid value
+        this.$refs.form.clearValidate();
+        this.form[prop] = this.blockData[prop];
+      }
+    },
+    onContentChange() {
+      this.syncBlockData({
+        key: 'content',
+        value: this.form.content,
+      });
+    },
+    onLoadBlockInfo(data) {
+      this.$refs.form.clearValidate();
+      // assign to editor
+      this.form = data;
+      // assign to store
+      this.setBlockData(data);
+      // this.setBlockData = data;
+      console.log(this.form);
+    },
+    onReceiveMessage(data) {
+      switch (data.action) {
+        case 'click_block':
+          this.onLoadBlockInfo(data.data.blockInfo);
+          break;
+      }
+    },
+  },
+  mounted() {
+    this.$root.$on('bridge-message', this.onReceiveMessage);
   },
 };
 </script>
