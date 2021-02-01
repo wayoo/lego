@@ -1,6 +1,8 @@
 <template>
   <div class="header-bar">
-
+    <div class="pull-right">
+      <el-button @click="generateConfig" type="success" size="mini">保存配置文件</el-button>
+    </div>
   </div>
 </template>
 
@@ -10,6 +12,15 @@ export default {
     return {
 
     };
+  },
+  computed: {
+  },
+  methods: {
+    generateConfig() {
+      this.sendBridgeMessage({
+        action: 'download_block_data',
+      });
+    },
   },
 };
 </script>
@@ -22,5 +33,10 @@ export default {
   border-bottom: 1px solid #1a1a1a;
   position: fixed;
   top: 0;
+
+  .pull-right {
+    float: right;
+    padding: 3px 10px;
+  }
 }
 </style>
