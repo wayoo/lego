@@ -10,7 +10,7 @@
         }">
         <div class="breadcrumb">
           <div class="crumb">
-            <div class="inner">{{ hover.name }}{{ hover.y }}, {{frame.scroll}}</div>
+            <div class="inner">{{ hoverInfo.name }}</div>
           </div>
         </div>
       </div>
@@ -24,7 +24,7 @@
         }">
         <div class="breadcrumb">
           <div class="crumb">
-            <div class="inner">{{ outlineInfo.name }}{{ outline.y }}, {{frame.scroll}}</div>
+            <div class="inner">{{ outlineInfo.name }}</div>
           </div>
         </div>
       </div>
@@ -64,6 +64,7 @@ export default {
         y: 0,
         display: false,
       },
+      outlineInfo: {},
       hover: {
         display: false,
         width: 0,
@@ -71,6 +72,7 @@ export default {
         x: 0,
         y: 0,
       },
+      hoverInfo: {},
       placeholder: {
         width: 100,
         height: 2,
@@ -80,7 +82,6 @@ export default {
       frame: {
         scroll: 0,
       },
-      outlineInfo: {},
       isDrag: false,
     };
   },
@@ -109,7 +110,6 @@ export default {
       // this.setBlockData(data.blockInfo);
     },
     hoverBlock(data) {
-      console.log(data);
       if (this.isDrag) { return; }
       this.hover.display = true;
       this.hover.width = data.rect.width;
@@ -126,6 +126,7 @@ export default {
       const rect = data.rect;
       const pointToElement = clientY - rect.top;
       let direction;
+      this.placeholder.x = rect.left;
       if (pointToElement < (rect.height / 2)) {
         direction = 'top';
         // place at top of current element
