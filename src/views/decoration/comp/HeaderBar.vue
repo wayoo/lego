@@ -1,7 +1,7 @@
 <template>
   <div class="header-bar">
     <div class="pull-right">
-      <el-button @click="generateConfig" type="success" size="mini">保存配置文件</el-button>
+      <el-button @click="generateConfig" class="action" size="mini">保存配置文件</el-button>
     </div>
   </div>
 </template>
@@ -37,6 +37,10 @@ export default {
   .pull-right {
     float: right;
     padding: 3px 10px;
+  }
+
+  .action {
+    background: #6b6b6b;
   }
 }
 </style>

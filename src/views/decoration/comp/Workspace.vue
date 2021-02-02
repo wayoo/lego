@@ -93,7 +93,10 @@ export default {
     ...mapMutations(['setBlockData', 'setPlaceholder', 'showPlaceholder']),
     onFrameScroll: debounce(function (data) {
       this.frame.scroll = data.scrollTop;
-    }, 16),
+    }, 10),
+    // onFrameScroll(data) {
+    //   this.frame.scroll = data.scrollTop;
+    // },
     drawOutline(data) {
       this.outline.display = true;
       // this.$refs['outline-selected']

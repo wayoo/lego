@@ -2,14 +2,38 @@
   <div class="left-side-bar">
     <div class="menu"></div>
     <div class="panel">
-      <div class="comp-list">
-        <div class="comp" data-component-id="List">List</div>
-        <div class="comp" data-component-id="Text">Text</div>
-        <div class="comp" data-component-id="Banner">Banner</div>
-        <div class="comp" data-component-id="Footer">Footer</div>
+      <div class="panel-header">
+        <h2>
+          Add Component
+        </h2>
       </div>
-      {{ componentToAdd.id }}
-      {{ JSON.stringify(placeholder) }}
+      <!-- <div class="group-header">
+        Layout
+      </div> -->
+      <el-collapse v-model="activeNames" @change="handleChange">
+        <el-collapse-item title="布局 Layout (TODO)" name="1">
+          <div class="comp-list">
+            <div class="comp" data-component-id="List">Section</div>
+            <div class="comp" data-component-id="Text">Container</div>
+            <div class="comp" data-component-id="Banner">Grid</div>
+            <div class="comp" data-component-id="Footer">Columns</div>
+          </div>
+        </el-collapse-item>
+        <el-collapse-item title="基础 Basic" name="2">
+          <div class="comp-list">
+            <div class="comp" data-component-id="List">List</div>
+            <div class="comp" data-component-id="Text">Text</div>
+            <div class="comp" data-component-id="Banner">Banner</div>
+            <div class="comp" data-component-id="Footer">Footer</div>
+          </div>
+        </el-collapse-item>
+        <el-collapse-item title="组件 Component" name="3">
+          <div>TODO</div>
+        </el-collapse-item>
+        <el-collapse-item title="表单 Form" name="4">
+          <div>TODO</div>
+        </el-collapse-item>
+      </el-collapse>
     </div>
   </div>
 </template>
@@ -24,6 +48,7 @@ export default {
       componentToAdd: {
         id: '',
       },
+      activeNames: ['1', '2', '3', '4'],
       isDebugMNode: false,
     };
   },
@@ -34,6 +59,9 @@ export default {
   },
   methods: {
     ...mapMutations(['hidePlaceholder', 'showPlaceholder']),
+    handleChange(val) {
+      console.log(val);
+    },
     finishDrag() {
       if (!this.isDebugMNode) {
         this.mNode.remove();
@@ -126,6 +154,7 @@ export default {
 
 <style lang="less">
 .left-side-bar {
+  user-select: none;
   background-color: #404040;
   height: calc(100% - 35px);
   left: 0;
@@ -166,6 +195,38 @@ export default {
       width: 6px;
       pointer-events: auto;
     }
+
+    .panel-header {
+      align-items: center;
+      color: #d9d9d9;
+      background: #4d4d4d;
+      padding: 0 10px;
+      height: 45px;
+
+      h2 {
+        font-size: 20px;
+        line-height: 24px;
+        margin: 0;
+        line-height: 45px;
+      }
+    }
+
+    .group-header {
+      outline: 0px;
+      cursor: default;
+      user-select: none;
+      background: rgb(43, 43, 43);
+      border-bottom: 1px solid rgb(33, 33, 33);
+      height: 28px;
+      padding-left: 4px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+      box-sizing: border-box;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      flex: 0 1 auto;
+    }
   }
 
   .comp-list {
@@ -174,7 +235,20 @@ export default {
 
     .comp {
       margin: 10px;
+      cursor: pointer;
     }
+  }
+
+  .el-collapse-item__header {
+    background: #2b2b2b;
+    padding-left: 10px;
+    height: 32px;
+    line-height: 32px;
+  }
+
+  .el-collapse-item__content {
+    background: #404040;
+    padding: 0;
   }
 }
 </style>
