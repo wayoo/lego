@@ -21,6 +21,7 @@ export default {
         action: 'update_block_data',
         data: {
           id: state.blockData.id,
+          category: state.blockData.category,
           ...data,
         },
       }).then((res) => {

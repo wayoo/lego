@@ -13,18 +13,22 @@
       <el-collapse v-model="activeNames" @change="handleChange">
         <el-collapse-item title="布局 Layout (TODO)" name="1">
           <div class="comp-list">
-            <div class="comp" data-component-id="List">Section</div>
-            <div class="comp" data-component-id="Text">Container</div>
-            <div class="comp" data-component-id="Banner">Grid</div>
-            <div class="comp" data-component-id="Footer">Columns</div>
+            <div class="comp" data-component-id="Section"
+                    data-component-cate="layout">Section</div>
+            <div class="comp" data-component-id="Container"
+                    data-component-cate="layout">Container</div>
+            <div class="comp" data-component-id="TwoCol"
+                    data-component-cate="layout">Grid</div>
+            <div class="comp" data-component-id="ThreeCol"
+                    data-component-cate="layout">Columns</div>
           </div>
         </el-collapse-item>
         <el-collapse-item title="基础 Basic" name="2">
           <div class="comp-list">
-            <div class="comp" data-component-id="List">List</div>
-            <div class="comp" data-component-id="Text">Text</div>
-            <div class="comp" data-component-id="Banner">Banner</div>
-            <div class="comp" data-component-id="Footer">Footer</div>
+            <div class="comp" data-component-id="List" data-component-cate="block">List</div>
+            <div class="comp" data-component-id="Text" data-component-cate="block">Text</div>
+            <div class="comp" data-component-id="Banner" data-component-cate="block">Banner</div>
+            <div class="comp" data-component-id="Footer" data-component-cate="block">Footer</div>
           </div>
         </el-collapse-item>
         <el-collapse-item title="组件 Component" name="3">
@@ -89,13 +93,22 @@ export default {
       function dragMouseDown(e) {
         cloneNode();
         self.componentToAdd.id = elmnt.getAttribute('data-component-id');
+        const category = elmnt.getAttribute('data-component-cate');
 
         // clear events;
         document.onmouseup = closeDragElement;
         // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
+        // FIXME deprecated this usage
         self.sendBridgeMessage({
           action: 'start_tracking_mouse',
+        });
+        self.sendBridgeMessage({
+          action: 'start_dragging_component',
+          data: {
+            category,
+            name: self.componentToAdd.id,
+          }
         });
       }
 
@@ -139,6 +152,9 @@ export default {
           // only call back received from child will treated as success
           this.finishDrag();
           this.dispathComponentAddEvent();
+          break;
+        case 'hide_placeholder':
+          this.hidePlaceholder();
           break;
       }
     }

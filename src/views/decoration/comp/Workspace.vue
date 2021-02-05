@@ -127,20 +127,24 @@ export default {
       const pointToElement = clientY - rect.top;
       let direction;
       this.placeholder.x = rect.left;
-      if (pointToElement < (rect.height / 2)) {
+      const outsideSep = 10;
+      const insideSep = -12;
+      const sep = data.isInside ? insideSep : outsideSep;
+      if (pointToElement < (rect.height / 2) || data.isInside) {
         direction = 'top';
         // place at top of current element
-        this.placeholder.y = rect.top - 10 + data.scrollTop;
+        this.placeholder.y = rect.top - sep + data.scrollTop;
       } else {
         direction = 'bottom';
         // place at bottom of current element
-        this.placeholder.y = rect.top + rect.height + 10 + data.scrollTop;
+        this.placeholder.y = rect.top + rect.height + sep + data.scrollTop;
       }
       this.placeholder.width = rect.width;
 
       const placeholderInfo = {
         blockInfo: data.blockInfo,
         direction,
+        isInside: data.isInside,
       };
       this.setPlaceholder(placeholderInfo);
       // TODO save this information to vuex
@@ -158,7 +162,6 @@ export default {
           this.hoverBlock(data.data);
           break;
         case 'unhover_block':
-          console.log('un hover');
           this.hover.display = false;
           break;
         case 'window_scroll':
@@ -179,7 +182,7 @@ export default {
           this.updatePlaceholder(data.data);
           break;
         default:
-          console.log('Unhandled action: ', data.action);
+          // console.log('Unhandled action: ', data.action);
           break;
       }
     },

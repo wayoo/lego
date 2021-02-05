@@ -4,12 +4,14 @@ export default {
       blockInfo: {},
       direction: '',
       display: false,
+      isInside: false,
     },
   },
   mutations: {
     setPlaceholder(state, data) {
       state.placeholder.blockInfo = data.blockInfo;
       state.placeholder.direction = data.direction;
+      state.placeholder.isInside = data.isInside;
       // Vue.set(state.placeholder, 'blockInfo', data.blockInfo);
       // Vue.set(state.placeholder, 'direction', data.direction);
       // state.placeholder = { ...data };
