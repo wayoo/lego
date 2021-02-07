@@ -36,7 +36,7 @@
           width: placeholder.width + 'px',
           height: placeholder.height + 'px',
           transform: `translate(${placeholder.x}px, ${placeholder.y - frame.scroll}px)`,
-        }">
+        }" :class="{ invalid: !placeholderInfo.isValid }">
 
     </div>
     <iframe id="work-frame" ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe>
@@ -145,6 +145,7 @@ export default {
         blockInfo: data.blockInfo,
         direction,
         isInside: data.isInside,
+        isValid: data.isValid,
       };
       this.setPlaceholder(placeholderInfo);
       // TODO save this information to vuex
@@ -252,6 +253,10 @@ export default {
   .bem-placeholder {
     position: absolute;
     background: #178df7;
+
+    &.invalid {
+      background: #f33750;
+    }
   }
 
   .outline {

@@ -5,6 +5,7 @@ export default {
       direction: '',
       display: false,
       isInside: false,
+      isValid: true,
     },
   },
   mutations: {
@@ -12,9 +13,7 @@ export default {
       state.placeholder.blockInfo = data.blockInfo;
       state.placeholder.direction = data.direction;
       state.placeholder.isInside = data.isInside;
-      // Vue.set(state.placeholder, 'blockInfo', data.blockInfo);
-      // Vue.set(state.placeholder, 'direction', data.direction);
-      // state.placeholder = { ...data };
+      state.placeholder.isValid = data.isValid;
     },
     hidePlaceholder(state) {
       state.placeholder.display = false;

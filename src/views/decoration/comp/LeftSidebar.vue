@@ -17,9 +17,9 @@
                     data-component-cate="layout">Section</div>
             <div class="comp" data-component-id="Container"
                     data-component-cate="layout">Container</div>
-            <div class="comp" data-component-id="TwoCol"
-                    data-component-cate="layout">Grid</div>
-            <div class="comp" data-component-id="ThreeCol"
+            <!-- <div class="comp" data-component-id="TwoCol" -->
+                    <!-- data-component-cate="layout">Grid</div> -->
+            <div class="comp" data-component-id="Columns"
                     data-component-cate="layout">Columns</div>
           </div>
         </el-collapse-item>
