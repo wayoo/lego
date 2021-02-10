@@ -5,7 +5,7 @@
         <div class="property-editor">
           <el-form ref="form" :model="form" :rules="rules"
             @validate="onValidate"
-            label-width="80px">
+            label-width="70px">
             <el-form-item label="模块id">
               <el-input v-model="form.id" disabled></el-input>
             </el-form-item>
@@ -22,8 +22,12 @@
               <el-input v-model="form.module" disabled></el-input>
             </el-form-item>
             <template v-if="form.name === 'Text'">
-              <el-input type="textarea" rows="20" v-model="form.content"
-                @input="onContentChange"></el-input>
+              <block-text :data="form" @change="onChange"></block-text>
+            </template>
+            <template v-if="form.name === 'Columns'">
+              <div>
+                <editor-columns :data="form" @change="onChange"></editor-columns>
+              </div>
             </template>
           </el-form>
         </div>
@@ -37,8 +41,16 @@
 <script>
 /* eslint-disable */
 import { mapState, mapMutations, mapActions } from 'vuex';
+import editorColumns from '../editor/Columns.vue';
+import blockText from '../editor/block/Text.vue';
 
 export default {
+  components: {
+    // layouts
+    editorColumns,
+    // blocks
+    blockText,
+  },
   data() {
     const blockData = this.$store.state.editor.blockData;
 
@@ -78,7 +90,7 @@ export default {
   },
   methods: {
     ...mapMutations(['setBlockData']),
-    ...mapActions(['syncBlockData']),
+    ...mapActions(['syncBlockData', 'syncComponentData']),
     onValidate(prop, valid, errTip) {
       if (valid) {
         // update to view
@@ -92,11 +104,8 @@ export default {
         this.form[prop] = this.blockData[prop];
       }
     },
-    onContentChange() {
-      this.syncBlockData({
-        key: 'content',
-        value: this.form.content,
-      });
+    onChange() {
+      this.syncComponentData(this.form);
     },
     onLoadBlockInfo(data) {
       this.$refs.form.clearValidate();
@@ -105,7 +114,6 @@ export default {
       // assign to store
       this.setBlockData(data);
       // this.setBlockData = data;
-      console.log(this.form);
     },
     onReceiveMessage(data) {
       switch (data.action) {

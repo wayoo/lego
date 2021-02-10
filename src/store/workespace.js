@@ -21,8 +21,5 @@ export default {
     showPlaceholder(state) {
       state.placeholder.display = true;
     },
-    // setBlockData(state, data) {
-    //   state.blockData = { ...data };
-    // },
   },
 };

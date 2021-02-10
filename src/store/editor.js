@@ -9,10 +9,15 @@ export default {
   state: {
     blockData: {
     },
+    componentData: {
+    },
   },
   mutations: {
     setBlockData(state, data) {
       state.blockData = { ...state.blockData, ...data };
+    },
+    setCompnentData(state, data) {
+      state.componentData = data;
     },
   },
   actions: {
@@ -24,6 +29,16 @@ export default {
           category: state.blockData.category,
           ...data,
         },
+      }).then((res) => {
+        console.log(res);
+      }, (err) => {
+        console.log(err);
+      });
+    },
+    syncComponentData(store, data) {
+      msgr.sendMessage({
+        action: 'update_component_data',
+        data,
       }).then((res) => {
         console.log(res);
       }, (err) => {

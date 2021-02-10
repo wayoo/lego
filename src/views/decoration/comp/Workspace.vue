@@ -107,7 +107,6 @@ export default {
       this.outline.y = data.rect.y + data.scrollTop;
 
       this.outlineInfo = data.blockInfo;
-      // this.setBlockData(data.blockInfo);
     },
     hoverBlock(data) {
       if (this.isDrag) { return; }
@@ -158,6 +157,9 @@ export default {
       switch (data.action) {
         case 'click_block':
           this.drawOutline(data.data);
+          break;
+        case 'hide_outline':
+          this.outline.display = false;
           break;
         case 'hover_block':
           this.hoverBlock(data.data);
