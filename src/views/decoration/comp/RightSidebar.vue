@@ -22,7 +22,7 @@
               <el-input v-model="form.module" disabled></el-input>
             </el-form-item>
             <template v-if="form.name === 'Text'">
-              <block-text :data="form" @change="onChange"></block-text>
+              <block-text :key="form.id" :data="form" @change="onChange"></block-text>
             </template>
             <template v-if="form.name === 'Columns'">
               <div>

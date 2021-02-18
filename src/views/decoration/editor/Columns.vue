@@ -7,7 +7,6 @@
         <el-radio-button label="four">四</el-radio-button>
       </el-radio-group>
     </el-form-item>
-    {{ JSON.stringify(data) }}
   </div>
 </template>
 
@@ -59,6 +58,10 @@ export default {
       if (val === 'three') {
         if (this.data.children.length >= 3) {
           this.data.children = this.data.children.slice(0, 3);
+          this.data.children.forEach((col) => {
+            // eslint-disable-next-line no-param-reassign
+            col.props.span = 8;
+          });
         } else {
           this.data.children[0].props.span = 8;
           this.data.children[1].props.span = 8;
