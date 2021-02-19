@@ -24,7 +24,14 @@
         }">
         <div class="breadcrumb">
           <div class="crumb">
-            <div class="inner">{{ outlineInfo.name }}</div>
+            <template v-if="isCompHierarchyShow">
+              <div class="inner" v-for="(comp) in compHierarchy" :key="comp.id"
+                @mouseover="onCompHover(comp)"
+                @click="onCompClick(comp)">
+                {{ comp.name }}
+              </div>
+            </template>
+            <div class="inner" @click="toggleCompHierarchy">{{ outlineInfo.name }}</div>
           </div>
         </div>
       </div>
@@ -50,6 +57,9 @@
 /* eslint-disable */
 import { mapMutations, mapState } from 'vuex';
 import { debounce } from '../../../common/utils';
+import Messenger from '../../../common/messenger';
+
+const msgr = new Messenger('#work-frame');
 // import Vue from 'vue';
 // import Home from '../../template/Home.vue';
 
@@ -79,6 +89,8 @@ export default {
         x: 0,
         y: 0,
       },
+      compHierarchy: [],
+      isCompHierarchyShow: false,
       frame: {
         scroll: 0,
       },
@@ -100,6 +112,7 @@ export default {
     // },
     drawOutline(data) {
       this.outline.display = true;
+      this.isCompHierarchyShow = false;
       // this.$refs['outline-selected']
       this.outline.width = data.rect.width;
       this.outline.height = data.rect.height;
@@ -153,6 +166,39 @@ export default {
       //   direction,
       // };
     },
+    onCompClick(comp) {
+      msgr.sendMessage({
+        action: 'parent_click_comp',
+        data: comp,
+      }).then(res => {
+        console.log(res);
+      })
+    },
+    onCompHover(comp) {
+      msgr.sendMessage({
+        action: 'parent_hover_comp',
+        data: comp,
+      }).then(res => {
+        console.log(res);
+      })
+    },
+    toggleCompHierarchy() {
+      if (this.isCompHierarchyShow) {
+        this.isCompHierarchyShow = false;
+        return;
+      }
+
+      msgr.sendMessage({
+        action: 'find_comp_hierarchy',
+        data: {
+          id: this.outlineInfo.id,
+        }
+      }).then((res) => {
+        this.compHierarchy = res.slice(0, -1);
+        this.isCompHierarchyShow = true;
+        console.log(res);
+      });
+    },
     onReceiveMessage(data) {
       switch (data.action) {
         case 'click_block':
@@ -184,6 +230,9 @@ export default {
         case 'child_show_placeholder':
           this.updatePlaceholder(data.data);
           break;
+        case 'parent_show_comp_hierarchy':
+          this.
+          break;
         default:
           // console.log('Unhandled action: ', data.action);
           break;
@@ -197,6 +246,11 @@ export default {
         data,
       }, '*');
     },
+  },
+  filters: {
+    hierarchy(comps) {
+      return comps.slice(0, -1);
+    }
   },
   mounted() {
     this.$root.$on('bridge-message', (data) => {
@@ -275,11 +329,14 @@ export default {
       top: 0;
       width: 100%;
       height: 25px;
-      margin-top: -19px;
+      margin-top: -24px;
       margin-left: -1px;
     }
 
     .crumb {
+      position: absolute;
+      bottom: 0;
+
       .inner {
         padding: 0 10px;
         height: 18px;
@@ -291,6 +348,10 @@ export default {
         white-space: nowrap;
         float: left;
         clear: both;
+        pointer-events: initial;
+        cursor: pointer;
+        z-index: 100;
+        margin-bottom: 1px;
       }
     }
   }

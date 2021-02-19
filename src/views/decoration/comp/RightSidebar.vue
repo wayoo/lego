@@ -10,12 +10,6 @@
               <el-input v-model="form.id" disabled></el-input>
             </el-form-item>
             <el-form-item label="模块名" prop="name">
-              <!-- <el-select v-model="form.name" placeholder="" prop="name">
-                <el-option label="List" value="List"></el-option>
-                <el-option label="Text" value="Text"></el-option>
-                <el-option label="Banner" value="Banner"></el-option>
-                <el-option label="Footer" value="Footer"></el-option>
-              </el-select> -->
               <el-input v-model="form.name" ></el-input>
             </el-form-item>
             <el-form-item label="所属模块">
@@ -24,7 +18,7 @@
             <template v-if="form.name === 'Text'">
               <block-text :key="form.id" :data="form" @change="onChange"></block-text>
             </template>
-            <template v-if="form.name === 'Columns'">
+            <template v-if="form.name === 'Columns' && form.tag === 'el-row'">
               <div>
                 <editor-columns :data="form" @change="onChange"></editor-columns>
               </div>
