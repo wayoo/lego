@@ -6,19 +6,19 @@
 
 <script>
 export default {
-  methods: {
-    receiveMessage(data) {
-      if (data.data.type === 'bridge-message') {
-        this.$root.$emit('bridge-message', data.data.data);
-      }
-    },
-  },
-  mounted() {
-    window.addEventListener('message', this.receiveMessage);
-  },
-  beforeDestroy() {
-    window.removeEventListener('message', this.receiveMessage);
-  },
+  // methods: {
+  //   receiveMessage(data) {
+  //     if (data.data.type === 'bridge-message') {
+  //       this.$root.$emit('bridge-message', data.data.data);
+  //     }
+  //   },
+  // },
+  // mounted() {
+  //   window.addEventListener('message', this.receiveMessage);
+  // },
+  // beforeDestroy() {
+  //   window.removeEventListener('message', this.receiveMessage);
+  // },
 };
 </script>
 
@@ -50,22 +50,5 @@ html, body {
       color: #42b983;
     }
   }
-}
-
-.comp {
-  width: 60px;
-  height: 60px;
-  background: #666;
-  text-align: center;
-  color: #d9d9d9;
-  font-size: 12px;
-  line-height: 60px;
-  user-select: none;
-  box-sizing: border-box;
-}
-
-.comp-moving {
-  position: absolute;
-  z-index: 190;
 }
 </style>

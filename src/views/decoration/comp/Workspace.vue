@@ -17,7 +17,7 @@
 
       <!-- 选中的容器 -->
       <div ref="outline-selected" class="outline selected-node" :style="{
-          display: !isDrag && outline.display ? 'block' : 'none',
+          display: !isDrag && outlineInfo.display ? 'block' : 'none',
           width: outline.width + 'px',
           height: outline.height + 'px',
           transform: `translate(${outline.x}px, ${outline.y - frame.scroll}px)`,
@@ -31,8 +31,9 @@
                 {{ comp.name }}
               </div>
             </template>
-            <div class="inner" @click="toggleCompHierarchy">{{ outlineInfo.name }}</div>
+            <div class="inner" @click="toggleCompHierarchy">{{ outlineInfo.blockInfo.name }}</div>
           </div>
+          <div class="close" title="删除模块" @click="onCompDeletion(outlineInfo.blockInfo)"> x </div>
         </div>
       </div>
     </div>
@@ -46,7 +47,10 @@
         }" :class="{ invalid: !placeholderInfo.isValid }">
 
     </div>
-    <iframe id="work-frame" ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe>
+
+    <iframe id="work-frame" ref="frame" class="work-frame"
+      :src="`http://${hostname}/dynamic/${pageId}`" frameborder="0"></iframe>
+    <!-- <iframe id="work-frame" ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe> -->
     <!-- <div class="page" ref="pageRoot"> -->
     <!-- </div> -->
     <!-- <div class="green block">asas</div> -->
@@ -56,8 +60,8 @@
 <script>
 /* eslint-disable */
 import { mapMutations, mapState } from 'vuex';
-import { debounce } from '../../../common/utils';
-import Messenger from '../../../common/messenger';
+import { debounce } from '../common/utils';
+import Messenger from '../common/messenger';
 
 const msgr = new Messenger('#work-frame');
 // import Vue from 'vue';
@@ -65,7 +69,11 @@ const msgr = new Messenger('#work-frame');
 
 export default {
   data() {
+    // const hostname = this.$route.query.site;
+    // this.$store.state.workspace.hostname = hostname;
+
     return {
+      pageId: this.$route.params.id,
       shadow: null,
       outline: {
         width: 100,
@@ -74,7 +82,7 @@ export default {
         y: 0,
         display: false,
       },
-      outlineInfo: {},
+      // outlineInfo: {},
       hover: {
         display: false,
         width: 0,
@@ -100,10 +108,16 @@ export default {
   computed: {
     ...mapState({
       placeholderInfo: (state) => state.workspace.placeholder,
+      outlineInfo: (state) => state.workspace.outline,
+      hostname: (state) => state.workspace.hostname,
     })
   },
   methods: {
-    ...mapMutations(['setBlockData', 'setPlaceholder', 'showPlaceholder']),
+    ...mapMutations(['setBlockData', 'setPlaceholder', 'showPlaceholder',
+      'stateSetOutline',
+      'stateShowOutline',
+      'stateHideOutline',
+    ]),
     onFrameScroll: debounce(function (data) {
       this.frame.scroll = data.scrollTop;
     }, 10),
@@ -111,7 +125,7 @@ export default {
     //   this.frame.scroll = data.scrollTop;
     // },
     drawOutline(data) {
-      this.outline.display = true;
+      // this.outline.display = true;
       this.isCompHierarchyShow = false;
       // this.$refs['outline-selected']
       this.outline.width = data.rect.width;
@@ -119,7 +133,8 @@ export default {
       this.outline.x = data.rect.x;
       this.outline.y = data.rect.y + data.scrollTop;
 
-      this.outlineInfo = data.blockInfo;
+      this.stateSetOutline({ blockInfo: data.blockInfo, display: true });
+      // this.outlineInfo = data.blockInfo;
     },
     hoverBlock(data) {
       if (this.isDrag) { return; }
@@ -182,6 +197,14 @@ export default {
         console.log(res);
       })
     },
+    onCompDeletion(comp) {
+      msgr.sendMessage({
+        action: 'parent_delete_comp',
+        data: comp,
+      }).then(res => {
+        console.log(res);
+      })
+    },
     toggleCompHierarchy() {
       if (this.isCompHierarchyShow) {
         this.isCompHierarchyShow = false;
@@ -191,7 +214,7 @@ export default {
       msgr.sendMessage({
         action: 'find_comp_hierarchy',
         data: {
-          id: this.outlineInfo.id,
+          id: this.outlineInfo.blockInfo.id,
         }
       }).then((res) => {
         this.compHierarchy = res.slice(0, -1);
@@ -202,10 +225,12 @@ export default {
     onReceiveMessage(data) {
       switch (data.action) {
         case 'click_block':
+        case 'update_block':
           this.drawOutline(data.data);
           break;
         case 'hide_outline':
-          this.outline.display = false;
+          // this.outline.display = false;
+          this.stateHideOutline();
           break;
         case 'hover_block':
           this.hoverBlock(data.data);
@@ -217,7 +242,8 @@ export default {
           this.onFrameScroll(data.data);
           break;
         case 'drag_start':
-          this.outline.display = false;
+          this.stateHideOutline();
+          // this.outline.display = false;
           this.isDrag = true;
           break;
         case 'drag_end':
@@ -253,16 +279,14 @@ export default {
     }
   },
   mounted() {
-    this.$root.$on('bridge-message', (data) => {
-      this.onReceiveMessage(data);
+    window.addEventListener('message', (data) => {
+      if (data.data.type === 'bridge-message') {
+        this.onReceiveMessage(data.data.data);
+      }
     });
-    this.$root.$on('send-bridge-message', (data) => {
-      this.sendMessage(data);
-    });
-    // window.addEventListener('message', this.receiveMessage);
-
-    // bind scroll information
-    // window.addEventListener('scroll', this.onScroll);
+    window.stateHideOutline = () => {
+      this.stateHideOutline();
+    }
   },
   beforeDestroy() {
     // window.removeEventListener('message', this.receiveMessage);
@@ -331,6 +355,19 @@ export default {
       height: 25px;
       margin-top: -24px;
       margin-left: -1px;
+
+      .close {
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        color: #f33750;
+        // background: red;
+        position: absolute;
+        right: 0;
+        cursor: pointer;
+        pointer-events: initial;
+        z-index: 100;
+      }
     }
 
     .crumb {

@@ -13,17 +13,17 @@ export default {
     },
   },
   data() {
-    const blockData = this.data;
-    console.log(blockData);
+    console.log(this.data);
+
     return {
       form: {
-        content: blockData.content,
+        content: this.data.props.data.content,
       },
     };
   },
   methods: {
     onContentChange(val) {
-      this.data.content = val;
+      this.data.props.data.content = val;
       this.$emit('change');
     },
   },

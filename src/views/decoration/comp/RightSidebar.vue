@@ -20,8 +20,22 @@
             </template>
             <template v-if="form.name === 'Columns' && form.tag === 'el-row'">
               <div>
-                <editor-columns :data="form" @change="onChange"></editor-columns>
+                <layout-columns :data="form" @change="onChange"></layout-columns>
               </div>
+            </template>
+            <template v-if="form.name === 'Flexs'">
+              <div>
+                <layout-flexs :key="form.id" :data="form" @change="onChange"></layout-flexs>
+              </div>
+            </template>
+            <template v-if="form.name === 'Container'">
+                <layout-container :key="form.id" :data="form" @change="onChange"></layout-container>
+            </template>
+            <template v-if="form.name === 'Tabs'">
+              <basic-tabs :key="form.id" :data="form" @change="onChange"></basic-tabs>
+            </template>
+            <template v-if="form.name === 'Carousel'">
+              <basic-carousel :key="form.id" :data="form" @change="onChange"></basic-carousel>
             </template>
           </el-form>
         </div>
@@ -34,19 +48,30 @@
 
 <script>
 /* eslint-disable */
+import Messenger from '../common/messenger';
+const msgr = new Messenger('#work-frame');
 import { mapState, mapMutations, mapActions } from 'vuex';
-import editorColumns from '../editor/Columns.vue';
+import layoutContainer from '../editor/layout/Container.vue';
+import layoutColumns from '../editor/layout/Columns.vue';
+import layoutFlexs from '../editor/layout/Flexs.vue';
 import blockText from '../editor/block/Text.vue';
+import basicTabs from '../editor/basic/Tabs.vue';
+import basicCarousel from '../editor/basic/Carousel.vue';
 
 export default {
   components: {
     // layouts
-    editorColumns,
+    layoutContainer,
+    layoutColumns,
+    layoutFlexs,
+    // basic
+    basicTabs,
+    basicCarousel,
     // blocks
     blockText,
   },
   data() {
-    const blockData = this.$store.state.editor.blockData;
+    // const blockData = this.$store.state.editor.blockData;
 
     return {
       form: {
@@ -99,14 +124,26 @@ export default {
       }
     },
     onChange() {
-      this.syncComponentData(this.form);
+      console.log(JSON.stringify(this.form));
+      const data = JSON.parse(JSON.stringify(this.form));
+      // this.syncComponentData(this.form);
+      console.log(data);
+      msgr.sendMessage({
+        action: 'update_component_data',
+        data,
+      }).then((res) => {
+        console.log(res);
+      }, (err) => {
+        console.log(err);
+      });
     },
+    // ignore
     onLoadBlockInfo(data) {
-      this.$refs.form.clearValidate();
+      // this.$refs.form.clearValidate();
       // assign to editor
       this.form = data;
       // assign to store
-      this.setBlockData(data);
+      // this.setBlockData(data);
       // this.setBlockData = data;
     },
     onReceiveMessage(data) {
@@ -118,7 +155,12 @@ export default {
     },
   },
   mounted() {
-    this.$root.$on('bridge-message', this.onReceiveMessage);
+    window.addEventListener('message', (data) => {
+      if (data.data.type === 'bridge-message') {
+        this.onReceiveMessage(data.data.data);
+      }
+    });
+    // this.$root.$on('bridge-message', this.onReceiveMessage);
   },
 };
 </script>
@@ -135,6 +177,7 @@ export default {
   padding: 0;
   z-index: 16;
   user-select: none;
+  overflow-y: scroll;
 
   color: #d9d9d9;
 
@@ -152,6 +195,10 @@ export default {
 
   .el-tabs__content {
     background: #404040;
+  }
+
+  ::placeholder {
+    color: rgb(115, 115, 115);
   }
 }
 </style>

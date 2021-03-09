@@ -11,31 +11,16 @@
         Layout
       </div> -->
       <el-collapse v-model="activeNames" @change="handleChange">
-        <el-collapse-item title="布局 Layout (TODO)" name="1">
+        <el-collapse-item :title="grp.title" :name="k"
+          v-for="(grp, k) in components"
+          :key="k">
           <div class="comp-list">
-            <div class="comp" data-component-id="Section"
-                    data-component-cate="layout">Section</div>
-            <div class="comp" data-component-id="Container"
-                    data-component-cate="layout">Container</div>
-            <!-- <div class="comp" data-component-id="TwoCol" -->
-                    <!-- data-component-cate="layout">Grid</div> -->
-            <div class="comp" data-component-id="Columns"
-                    data-component-cate="layout">Columns</div>
+            <div class="comp"
+                    :key="item.id"
+                    v-for="item in grp.items"
+                    :data-component-id="item.id"
+                    :data-component-cate="grp.type">{{ item.name }}</div>
           </div>
-        </el-collapse-item>
-        <el-collapse-item title="基础 Basic" name="2">
-          <div class="comp-list">
-            <div class="comp" data-component-id="List" data-component-cate="block">List</div>
-            <div class="comp" data-component-id="Text" data-component-cate="block">Text</div>
-            <div class="comp" data-component-id="Banner" data-component-cate="block">Banner</div>
-            <div class="comp" data-component-id="Footer" data-component-cate="block">Footer</div>
-          </div>
-        </el-collapse-item>
-        <el-collapse-item title="组件 Component" name="3">
-          <div>TODO</div>
-        </el-collapse-item>
-        <el-collapse-item title="表单 Form" name="4">
-          <div>TODO</div>
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -44,6 +29,9 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
+import Messenger from '../common/messenger';
+
+const msgr = new Messenger('#work-frame');
 /* eslint-disable */
 export default {
   data() {
@@ -52,8 +40,47 @@ export default {
       componentToAdd: {
         id: '',
       },
-      activeNames: ['1', '2', '3', '4'],
+      activeNames: [0, 1, 2, 3],
       isDebugMNode: false,
+      components: [
+        {
+          type: 'layout',
+          title: '布局 Layout',
+          items: [
+            { name: 'Section', id: 'Section' },
+            { name: 'Container', id: 'Container' },
+            { name: 'Columns', id: 'Columns' },
+            { name: 'Flexs', id: 'Flexs' },
+          ]
+        },
+        {
+          type: 'block',
+          title: '基础 Basic',
+          items: [
+            { name: 'Form', id: 'Form' },
+            { name: 'Tabs', id: 'Tabs' },
+            { name: 'Carousel', id: 'Carousel' },
+          ]
+        },
+        {
+          type: 'block',
+          title: '组件 Component',
+          items: [
+            { name: 'List', id: 'List' },
+            { name: 'Text', id: 'Text' },
+            { name: 'Banner', id: 'Banner' },
+            { name: 'Footer', id: 'Footer' },
+          ],
+        },
+        {
+          type: 'form',
+          title: '表单 Form',
+          items: [
+            { name: '单选框', id: 'Radio' },
+            { name: '开关', id: 'Switch' },
+          ]
+        }
+      ],
     };
   },
   computed: {
@@ -131,12 +158,13 @@ export default {
 
     // notifiy client
     dispathComponentAddEvent() {
+      return;
+      console.log(this.placeholder.blockInfo);
       const data = {
         targetBlockId: this.placeholder.blockInfo.id,
         direction: this.placeholder.direction,
         componentId: this.componentToAdd.id,
       };
-
       this.sendBridgeMessage({
         action: 'add_component',
         data,
@@ -151,19 +179,27 @@ export default {
         case 'child_stop_tracking_mouse':
           // only call back received from child will treated as success
           this.finishDrag();
-          this.dispathComponentAddEvent();
+          // this.dispathComponentAddEvent();
           break;
         case 'hide_placeholder':
           this.hidePlaceholder();
           break;
       }
-    }
+    },
+    sendBridgeMessage(data) {
+      msgr.sendMessageWithoutCheck(data);
+    },
   },
   mounted() {
     document.querySelectorAll('.comp').forEach((item) => {
       this.dragElement(item);
     })
-    this.$root.$on('bridge-message', this.onReceiveMessage)
+    // this.$root.$on('bridge-message', this.onReceiveMessage)
+    window.addEventListener('message', (data) => {
+      if (data.data.type === 'bridge-message') {
+        this.onReceiveMessage(data.data.data);
+      }
+    });
   }
 };
 </script>
@@ -192,7 +228,8 @@ export default {
     color: #d9d9d9;
     font-size: 12px;
     line-height: 16px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: scroll;
     pointer-events: auto;
     width: 250px;
     height: 100%;
@@ -248,6 +285,7 @@ export default {
   .comp-list {
     display: flex;
     flex-wrap: wrap;
+    margin-right: -10px;
 
     .comp {
       margin: 10px;

@@ -7,7 +7,7 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    redirect: 'decoration',
+    redirect: '/decoration/8',
     // name: 'Home',
     // component: Home,
   },
@@ -20,9 +20,14 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
   },
   {
-    path: '/decoration',
+    path: '/decoration/:id',
     name: 'decoration',
     component: () => import('../views/decoration/index.vue'),
+  },
+  {
+    path: '/dynamic/:id',
+    name: 'dynamicPages',
+    component: () => import('../views/dynamic/index.vue'),
   },
 ];
 
