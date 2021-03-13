@@ -411,17 +411,9 @@ export default {
         category: data.category,
         name: data.name,
       };
-      this.sendBridgeMessage({
-        token: data.token,
-        success: true,
-      });
     },
     channelParentDragExistedComp(data) {
       this.setDraggingInfo('prepare_move_component', data.data.id, data.data.name);
-      this.sendBridgeMessage({
-        token: data.token,
-        success: true,
-      });
     },
     resetDraggingInfo() {
       this.draggingInfo = {
@@ -476,11 +468,6 @@ export default {
         // this.reportActiveCompPosition();
         this.reportUpdateCompPosition();
       });
-
-      this.sendBridgeMessage({
-        token: data.token,
-        success: true,
-      });
     },
     channelFindCompHierarchy(data) {
       const paths = findModulePath(this.compList, data.data.id);
@@ -501,18 +488,12 @@ export default {
       const elem = document.querySelector(`.dynamic-comp-id-${data.data.id}`);
       console.log(data.data);
       this.reportPosition('hover_block', elem, data.data);
-      this.sendBridgeMessage({
-        token: data.token,
-      });
     },
     channelParentDeleteComp(data) {
       const ret = findModulePosition(this.compList, data.data.id);
       console.log(ret);
       ret.list.splice(ret.index, 1);
       this.deActiveComponent();
-      this.sendBridgeMessage({
-        token: data.token,
-      });
     },
     // sendMessage(data) {
     //   this.sendBridgeMessage(data);

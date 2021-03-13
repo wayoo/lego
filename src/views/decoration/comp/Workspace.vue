@@ -32,7 +32,9 @@
                 {{ comp.name }}
               </div>
             </template>
-            <div class="inner" @click="toggleCompHierarchy">{{ outlineInfo.blockInfo.name }}</div>
+            <div class="inner"
+              @mousedown="onStartDraggingComp(outlineInfo.blockInfo)"
+              @click="toggleCompHierarchy">{{ outlineInfo.blockInfo.name }}</div>
           </div>
           <div class="close" title="删除模块" @click="onCompDeletion(outlineInfo.blockInfo)"> x </div>
         </div>
