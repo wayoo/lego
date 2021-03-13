@@ -1,3 +1,5 @@
+/* eslint-disable prefer-rest-params */
+/* eslint-disable no-unreachable */
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
@@ -250,8 +252,7 @@ ComponentFactory.register('form', 'Switch', () => {
       },
       on: {
         input(event) {
-          // conf.children[0].props.value = event;
-          console.log(event);
+          conf.children[0].props.value = event;
         },
       },
       category: 'form',
@@ -264,6 +265,7 @@ ComponentFactory.register('form', 'Switch', () => {
 
 ComponentFactory.restoreSwitch = function (data) {
   data.children[0].on.input = function (event) {
+    console.log(data);
     data.children[0].props.value = event;
   };
 };

@@ -60,6 +60,9 @@ export default {
         return [];
       },
     },
+    renderOnly: {
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -283,6 +286,8 @@ export default {
       // find module position in the json file
       const ret = findModulePosition(this.compList, this.placeholder.blockInfo.id);
       const module = ComponentFactory.create(this.draggingInfo.category, this.draggingInfo.name);
+      module.typeId = this.draggingInfo.typeId;
+      module.remote = this.draggingInfo.remote;
       if (module) {
         this.insertCompData(ret, module);
       }
