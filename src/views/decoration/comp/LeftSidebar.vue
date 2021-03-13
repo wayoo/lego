@@ -57,7 +57,6 @@ export default {
           type: 'block',
           title: '基础 Basic',
           items: [
-            { name: 'Form', id: 'Form' },
             { name: 'Tabs', id: 'Tabs' },
             { name: 'Carousel', id: 'Carousel' },
           ]
@@ -76,7 +75,8 @@ export default {
           type: 'form',
           title: '表单 Form',
           items: [
-            { name: '单选框', id: 'Radio' },
+            { name: '表单容器', id: 'Form' },
+            // { name: '单选框', id: 'Radio' },
             { name: '开关', id: 'Switch' },
           ]
         }

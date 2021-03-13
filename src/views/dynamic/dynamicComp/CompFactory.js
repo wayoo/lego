@@ -1,3 +1,6 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-plusplus */
 /* eslint-disable func-names */
 /* eslint-disable consistent-return */
 let i = 0;
@@ -25,6 +28,7 @@ ComponentFactory.create = function (category, name) {
       }
       break;
     case 'layout':
+    case 'form':
       fn = factorys[category] && factorys[category][name];
       if (fn) {
         comp = fn();
@@ -220,5 +224,61 @@ ComponentFactory.register('layout', 'Flexs', () => ({
   },
   ],
 }));
+
+ComponentFactory.register('form', 'Form', () => ({
+  tag: 'el-form',
+  name: 'Form',
+  rootElem: true,
+  id: idGenerator(),
+  children: [],
+}));
+
+ComponentFactory.register('form', 'Switch', () => {
+  const conf = {
+    tag: 'el-form-item',
+    name: 'Switch',
+    props: {
+      label: '属性',
+    },
+    id: idGenerator(),
+    children: [{
+      tag: 'el-switch',
+      id: idGenerator(),
+      ignore: true,
+      props: {
+        value: false,
+      },
+      on: {
+        input(event) {
+          conf.children[0].props.value = event;
+        },
+      },
+      category: 'form',
+      children: [],
+    }],
+  };
+
+  return conf;
+});
+
+ComponentFactory.restoreSwitch = function (data) {
+  data.children[0].on.input = function (event) {
+    data.children[0].props.value = event;
+  };
+};
+
+ComponentFactory.restore = function restore(compList) {
+  for (let i = 0, l = compList.length; i < l; i++) {
+    if (compList[i].name === 'Switch') {
+      ComponentFactory.restoreSwitch(compList[i]);
+    }
+  }
+
+  for (let i = 0, l = compList.length; i < l; i++) {
+    if (compList[i].children) {
+      restore(compList[i].children);
+    }
+  }
+};
 
 export default ComponentFactory;
