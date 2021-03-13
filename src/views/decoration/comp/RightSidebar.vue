@@ -37,6 +37,9 @@
             <template v-if="form.name === 'Carousel'">
               <basic-carousel :key="form.id" :data="form" @change="onChange"></basic-carousel>
             </template>
+            <template v-if="['Form', 'Switch'].includes(form.name)">
+              <form-index :key="form.id" :data="form" @change="onChange"></form-index>
+            </template>
           </el-form>
         </div>
       </el-tab-pane>
@@ -57,6 +60,7 @@ import layoutFlexs from '../editor/layout/Flexs.vue';
 import blockText from '../editor/block/Text.vue';
 import basicTabs from '../editor/basic/Tabs.vue';
 import basicCarousel from '../editor/basic/Carousel.vue';
+import FormIndex from '../editor/form/Index.vue';
 
 export default {
   components: {
@@ -69,6 +73,8 @@ export default {
     basicCarousel,
     // blocks
     blockText,
+    //
+    FormIndex,
   },
   data() {
     // const blockData = this.$store.state.editor.blockData;

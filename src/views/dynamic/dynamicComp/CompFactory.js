@@ -250,7 +250,8 @@ ComponentFactory.register('form', 'Switch', () => {
       },
       on: {
         input(event) {
-          conf.children[0].props.value = event;
+          // conf.children[0].props.value = event;
+          console.log(event);
         },
       },
       category: 'form',
