@@ -414,9 +414,8 @@ export default {
     channelParentDragNewComp(data) {
       this.isDragging = true;
       this.draggingInfo = {
+        ...data,
         type: 'add_new_component',
-        category: data.category,
-        name: data.name,
       };
     },
     channelParentDragExistedComp(data) {
@@ -581,7 +580,6 @@ export default {
     },
     // notify child scoll event to parent, for outline position update usage
     onScroll() {
-      console.log('xxxx');
       this.sendBridgeMessage({
         action: 'window_scroll',
         data: {
@@ -641,7 +639,6 @@ export default {
   mounted() {
     window.addEventListener('message', this.receiveMessage);
     window.addEventListener('scroll', this.onScroll);
-    console.log('!!!!');
     // console.log(this.$refs);
     // setTimeout(() => {
     //   console.log(this.$refs['c_16142229717831'].setData({"trainInfo":{"id":322,"name":"商品支付订单测试商品支付订单测试商品支付","trainStartTime":"2021-02-02 00:00:00","trainEndTime":"2021-02-11 23:59:59","iconUrl":"https://hrss-tes.oss-cn-beijing.aliyuncs.com/hrss/image/54e205c5fb204ac7a8e49fe756285c67-测试图片.JPG","isDraw":0,"isFaceRecognize":0,"isAlertWindow":0,"alertWindowTip":"亲爱的学员，还在吗？请不要走开，点击 ”我在“继续学习，否则您离开的时间将不计入学时","alertTime":10,"description":"商品支付订单测试商品支付订单测试商品支付订单测试商品支付订单测试训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍训练营介绍\n","publishStatus":2,"status":3,"createTime":"2021-02-02 14:54:00","createUserId":409,"updateUserId":409,"updateTime":"2021-02-02 14:55:35","isDel":0,"saasId":80,"studyHours":0.81,"studyProcess":10,"studyUpdateTime":"2021-02-12 00:00:00","isCandidphoto":0,"isFaceExamRecognize":0,"branchId":114,"isTrainTimePassed":3,"isConfigCert":0},"trainProcess":0,"courseCount":1}));
