@@ -168,16 +168,16 @@ export default {
     // given an block/component
     // validate com
     normalizeCompRootElem(elem) {
-      let root = elem;
-      let parent;
-      const compName = root.getAttribute('data-comp-name');
-      // dynamic bubble to root component
-      if (['Carousel'].includes(compName)) {
-        parent = findParentByClass(root.parentNode, 'dynamic-comp');
-        if (parent.getAttribute('data-comp-name') === compName) {
-          root = parent;
-        }
-      }
+      const root = elem;
+      // let parent;
+      // const compName = root.getAttribute('data-comp-name');
+      // // dynamic bubble to root component
+      // if (['Carousel'].includes(compName)) {
+      //   parent = findParentByClass(root.parentNode, 'dynamic-comp');
+      //   if (parent.getAttribute('data-comp-name') === compName) {
+      //     root = parent;
+      //   }
+      // }
       return root;
     },
     // determin which position module will be inserted
