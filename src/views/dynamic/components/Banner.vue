@@ -15,6 +15,7 @@ export default {
   .img {
     display: block;
     width: 100%;
+    pointer-events: none;
   }
 }
 </style>

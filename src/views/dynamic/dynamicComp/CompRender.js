@@ -160,19 +160,38 @@ export default {
         action: 'unhover_block',
       });
     },
+    // given an block/component
+    // validate com
+    normalizeCompRootElem(elem) {
+      let root = elem;
+      let parent;
+      const compName = root.getAttribute('data-comp-name');
+      // dynamic bubble to root component
+      if (['Carousel'].includes(compName)) {
+        parent = findParentByClass(root.parentNode, 'dynamic-comp');
+        if (parent.getAttribute('data-comp-name') === compName) {
+          root = parent;
+        }
+      }
+      return root;
+    },
+    // determin which position module will be inserted
     onReportPlaceholder(e, block) {
       // only show place holder in dragging process;
       // if (!this.isDraggingComponent) { return; }
       // only handle left clicked event;
       if (e.which !== 1) { return; }
 
-      const container = findParentByClass(e.target, 'block')
+      let container = findParentByClass(e.target, 'block')
                         || findParentByClass(e.target, 'dynamic-comp');
 
       if (!container) {
         console.log('parent not found');
         return;
       }
+
+      container = this.normalizeCompRootElem(container);
+
       if (!this.checkWeakValidity(container)) {
         this.resetClientPlaceholder();
         this.hidePlaceholder();
@@ -362,11 +381,8 @@ export default {
         option[eventReceiver].mouseleave = this.onMouseleave;
         option[eventReceiver].click = (e) => {
           e.stopPropagation();
-          const root = findParentByClass(e.target, 'dynamic-comp');
-          //   const compName = root.getAttribute('data-comp-name');
-          //   if (root.parentNode.getAttribute('data-comp-name') === compName) {
-          //     root = root.parentNode;
-          //   }
+          let root = findParentByClass(e.target, 'dynamic-comp');
+          root = this.normalizeCompRootElem(root);
           // console.log(root.getAttribute('data-id'));
           const ret = findModulePosition(this.compList, root.getAttribute('data-id'));
           this.setActiveComponent(ret.list[ret.index]);
@@ -388,13 +404,24 @@ export default {
       this.$emit('compAction', data);
     },
     // ------ end ---------
-    enterAddCompDragging(data) {
+    channelParentDragNewComp(data) {
       this.isDragging = true;
       this.draggingInfo = {
         type: 'add_new_component',
         category: data.category,
         name: data.name,
       };
+      this.sendBridgeMessage({
+        token: data.token,
+        success: true,
+      });
+    },
+    channelParentDragExistedComp(data) {
+      this.setDraggingInfo('prepare_move_component', data.data.id, data.data.name);
+      this.sendBridgeMessage({
+        token: data.token,
+        success: true,
+      });
     },
     resetDraggingInfo() {
       this.draggingInfo = {
@@ -408,12 +435,20 @@ export default {
       const comp = findComponent(e.target);
       const name = comp.getAttribute('data-comp-name');
       if (comp) {
-        this.draggingInfo = {
-          type: 'prepare_move_component',
-          id: comp.getAttribute('data-id'),
-          name,
-        };
+        // this.draggingInfo = {
+        //   type: 'prepare_move_component',
+        //   id: comp.getAttribute('data-id'),
+        //   name,
+        // };
+        this.setDraggingInfo('prepare_move_component', comp.getAttribute('data-id'), name);
       }
+    },
+    setDraggingInfo(type, id, name) {
+      this.draggingInfo = {
+        type,
+        id,
+        name,
+      };
     },
     enterMoveCompDragging(e) {
       console.error('move ...');
@@ -466,6 +501,9 @@ export default {
       const elem = document.querySelector(`.dynamic-comp-id-${data.data.id}`);
       console.log(data.data);
       this.reportPosition('hover_block', elem, data.data);
+      this.sendBridgeMessage({
+        token: data.token,
+      });
     },
     channelParentDeleteComp(data) {
       const ret = findModulePosition(this.compList, data.data.id);
@@ -521,8 +559,11 @@ export default {
         case 'stop_tracking_mouse':
           window.removeEventListener('mousemove', this.docMousemove);
           break;
-        case 'start_dragging_component':
-          this.enterAddCompDragging(msg.data.data.data);
+        case 'start_dragging_existed_comp':
+          this.channelParentDragExistedComp(msg.data.data);
+          break;
+        case 'start_dragging_new_comp':
+          this.channelParentDragNewComp(msg.data.data.data);
           break;
         case 'update_component_data':
           this.handleUpdateComponentData(msg.data.data);
@@ -546,6 +587,9 @@ export default {
           console.log(msg.data);
           break;
       }
+      this.sendBridgeMessage({
+        token: msg.data.data.token,
+      });
     },
     // notify child scoll event to parent, for outline position update usage
     onScroll() {

@@ -27,6 +27,7 @@
             <template v-if="isCompHierarchyShow">
               <div class="inner" v-for="(comp) in compHierarchy" :key="comp.id"
                 @mouseover="onCompHover(comp)"
+                @mousedown="onStartDraggingComp(comp)"
                 @click="onCompClick(comp)">
                 {{ comp.name }}
               </div>
@@ -49,7 +50,7 @@
     </div>
 
     <iframe id="work-frame" ref="frame" class="work-frame"
-      :src="`http://${hostname}/dynamic/${pageId}`" frameborder="0"></iframe>
+      :src="`/dynamic/${pageId}`" frameborder="0"></iframe>
     <!-- <iframe id="work-frame" ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe> -->
     <!-- <div class="page" ref="pageRoot"> -->
     <!-- </div> -->
@@ -180,6 +181,14 @@ export default {
       //   blockId: data.blockId,
       //   direction,
       // };
+    },
+    onStartDraggingComp(comp) {
+      msgr.sendMessage({
+        action: 'start_dragging_existed_comp',
+        data: comp,
+      }).then(res => {
+        console.log(res);
+      })
     },
     onCompClick(comp) {
       msgr.sendMessage({

@@ -29,16 +29,26 @@ export default {
   },
   methods: {
     getData() {
-      this.$api.dynamicPages.get({ pageId: this.pageId }).then((res) => {
-        if (res.code === 0) {
-          if (!(res.data.components && res.data.components.length !== 0)) {
-            // eslint-disable-next-line no-param-reassign
-            res.data.components = [ComponentFactory.create('root')];
-          }
-          console.log(res.data);
-          this.pageConf = res.data;
+      const conf = localStorage.getItem('__dp__conf');
+      if (conf) {
+        try {
+          this.pageConf = JSON.parse(conf);
+          return;
+        } catch (e) {
+          console.log(e);
         }
-      });
+      }
+      this.pageConf.components = [ComponentFactory.create('root')];
+      // this.$api.dynamicPages.get({ pageId: this.pageId }).then((res) => {
+      //   if (res.code === 0) {
+      //     if (!(res.data.components && res.data.components.length !== 0)) {
+      //       // eslint-disable-next-line no-param-reassign
+      //       res.data.components = [ComponentFactory.create('root')];
+      //     }
+      //     console.log(res.data);
+      //     this.pageConf = res.data;
+      //   }
+      // });
     },
 
     onCompAction(data) {

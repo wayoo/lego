@@ -131,7 +131,7 @@ export default {
           action: 'start_tracking_mouse',
         });
         self.sendBridgeMessage({
-          action: 'start_dragging_component',
+          action: 'start_dragging_new_comp',
           data: {
             category,
             name: self.componentToAdd.id,
