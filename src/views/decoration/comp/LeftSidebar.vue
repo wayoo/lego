@@ -54,11 +54,19 @@ export default {
           ]
         },
         {
+          type: 'component',
+          title: '组件工厂',
+          items: [
+            { name: 'Component', id: 'Component' },
+          ],
+        },
+        {
           type: 'block',
           title: '基础 Basic',
           items: [
             { name: 'Tabs', id: 'Tabs' },
             { name: 'Carousel', id: 'Carousel' },
+            { name: 'Pagination', id: 'Pagination' },
           ]
         },
         {

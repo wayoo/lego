@@ -22,6 +22,7 @@ export default {
       blockInfo: {},
       display: false,
     },
+    compList: [],
   },
   mutations: {
     stateSetOutline(state, data) {
@@ -49,6 +50,9 @@ export default {
     },
     storeSetHostname(state, data) {
       state.hostname = data;
+    },
+    storeSetCompList(state, compList) {
+      state.compList = compList;
     },
   },
 };

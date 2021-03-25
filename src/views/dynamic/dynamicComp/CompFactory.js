@@ -31,6 +31,7 @@ ComponentFactory.create = function (category, name) {
       break;
     case 'layout':
     case 'form':
+    case 'component':
       fn = factorys[category] && factorys[category][name];
       if (fn) {
         comp = fn();
@@ -86,6 +87,21 @@ ComponentFactory.createRootComponent = function () {
   };
 };
 
+// eslint-disable-next-line arrow-body-style
+ComponentFactory.register('component', 'Component', () => {
+  return {
+    tag: 'div',
+    name: 'Component',
+    id: idGenerator(),
+    class: {
+      'comp-container': true,
+    },
+    children: [
+
+    ],
+  };
+});
+
 ComponentFactory.register('block', 'Tabs', () => ({
   id: idGenerator(),
   name: 'Tabs',
@@ -138,6 +154,15 @@ ComponentFactory.register('block', 'Carousel', () => ({
       children: [],
     },
   ],
+}));
+
+ComponentFactory.register('block', 'Pagination', () => ({
+  id: idGenerator(),
+  name: 'Pagination',
+  tag: 'el-pagination',
+  props: {
+    total: 50,
+  },
 }));
 
 ComponentFactory.register('block', 'Text', () => ({

@@ -26,12 +26,16 @@ function parentHasComponent(elem, name) {
   return p.tagName !== 'BODY';
 }
 
+// can't handle complex third-party components like ElementUI Carousel, Tabs
+// since they are wrapped with other container
+// hence child.parentNode !== rootElement
 function findComponent(elem) {
   let comp;
   comp = findParentByClass(elem, 'block');
   if (comp) { return comp; }
   comp = findParentByClass(elem, 'dynamic-comp');
   if (!comp) { return null; }
+  // auto find dynamic-comp parentNode like Flexs, Columns, etc
   while (comp.parentNode.getAttribute('data-comp-name')
                 === comp.getAttribute('data-comp-name')) {
     comp = comp.parentNode;
@@ -39,11 +43,19 @@ function findComponent(elem) {
   return comp;
 }
 
-const layoutComps = [
+const componentInstances = {};
+
+const expandEmptyChildrenComps = [
+  // layout
   'Section',
   'Container',
   'Columns',
   'Flexs',
+
+  // component
+  'Component',
+
+  // ui
   'Tabs',
   'Carousel',
   'Form',
@@ -267,7 +279,20 @@ export default {
       const movedPos = findModulePosition(this.compList, this.draggingInfo.id);
       const targetPos = findModulePosition(this.compList, this.placeholder.blockInfo.id);
       const module = movedPos.list.splice(movedPos.index, 1);
+      console.log(module, this.draggingInfo.id);
       this.insertCompData(targetPos, module[0]);
+      this.channelClientSyncModuleList();
+    },
+    createComponent() {
+      // find module position in the json file
+      const ret = findModulePosition(this.compList, this.placeholder.blockInfo.id);
+      const module = ComponentFactory.create(this.draggingInfo.category, this.draggingInfo.name);
+      if (module) {
+        module.typeId = this.draggingInfo.typeId;
+        module.remote = this.draggingInfo.remote;
+        this.insertCompData(ret, module);
+      }
+      this.channelClientSyncModuleList();
     },
     /**
      * case 1: add_new_component
@@ -282,23 +307,20 @@ export default {
         return;
       }
       if (this.draggingInfo.type !== 'add_new_component') { return; }
-
-      // find module position in the json file
-      const ret = findModulePosition(this.compList, this.placeholder.blockInfo.id);
-      const module = ComponentFactory.create(this.draggingInfo.category, this.draggingInfo.name);
-      module.typeId = this.draggingInfo.typeId;
-      module.remote = this.draggingInfo.remote;
-      if (module) {
-        this.insertCompData(ret, module);
-      }
+      this.createComponent();
     },
     renderConfig(h, data) {
       if (!data) { return console.error('no data'); }
       let childNodes = [];
 
-      if (data.children) {
-        childNodes = data.children.map((n) => this.renderConfig(h, n));
+      // auto inject subElem property to prevent drag
+      if (data.rootElem) {
+        data.children.forEach((item) => {
+          // eslint-disable-next-line no-param-reassign
+          item.subElem = true;
+        });
       }
+
       if (Object.prototype.toString.call(data) === '[object String]') {
         return data;
       }
@@ -320,8 +342,20 @@ export default {
         delete option.nativeOn;
       }
 
+      if (this.renderOnly) {
+        // handle several events
+        if (data.tag === 'dynamic-block') {
+          option.props.name = data.name;
+          option.props.blockInfo = data;
+        }
+        if (data.children) {
+          childNodes = data.children.map((n) => this.renderConfig(h, n));
+        }
+        return h(data.tag, option, childNodes);
+      }
+
       // add empty layout class
-      if (layoutComps.includes(data.name) && data.children.length === 0) {
+      if (expandEmptyChildrenComps.includes(data.name) && data.children.length === 0) {
         option.class['comp-empty'] = true;
       } else {
         option.class['comp-empty'] = false;
@@ -355,6 +389,10 @@ export default {
       } else if (option.class['dynamic-comp-root']) {
         // root element
         option.on.mousemove = (e) => {
+          // check left mouse is pressed
+          if (e.which !== 1) {
+            return;
+          }
           if (this.draggingInfo.type === 'prepare_move_component') {
             this.enterMoveCompDragging(e);
           }
@@ -374,7 +412,80 @@ export default {
         option.on.mouseleave = () => {
           this.hidePlaceholder();
         };
+      } else if (data.name === 'Component' && data.children.length) {
+        const self = this;
+        if (!componentInstances[`test-comp-${data.id}`]) {
+          componentInstances[`test-comp-${data.id}`] = true;
+          Vue.component(`test-comp-${data.id}`, {
+            data() {
+              return {
+                tmpl: 'wangyu',
+                val: 4,
+              };
+            },
+            render(c) {
+              let vm = this;
+              const pager = data.children[0];
+              // console.log(JSON.stringify(data.children[0]));
+
+              // eslint-disable-next-line no-param-reassign
+              // data.children[0].on['current-change'] = data.children[0].on['current-change'] || function (val) {
+              //   console.log(val);
+              //   t.val = val;
+              // };
+              // function evalInScope(js, contextAsScope) {
+              //   //# Return the results of the in-line anonymous function we .call with the passed context
+              //   return function() { with(this) { return eval(js); }; }.call(contextAsScope);
+              // }
+              if (pager) {
+                // eslint-disable-next-line no-param-reassign
+                data.children[0].props['current-page'] = this.val;
+                // eslint-disable-next-line no-param-reassign
+                data.children[0].on = data.children[0].on || {};
+                // pager.events = undefined;
+                // eslint-disable-next-line
+                for (const fnKey in pager.events) {
+                  const fnStr = pager.events[fnKey];
+                  const fnId = fnKey.replace('-', '');
+                  // eslint-disable-next-line
+                  const s = `
+                  vm.fn${fnId} = ${fnStr};
+                  pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
+                  // eslint-disable-next-line
+                  eval(s);
+                  console.log(`====> bind: ${fnKey}`);
+                  // var result = function(str){
+                  //   // eslint-disable-next-line
+                  //   return eval(str);
+                  // }.call(this, s);
+                  // eslint-disable-next-line
+                  // eval(`console.log(pager.on['${fnKey}'], '!!!!!')`);
+                }
+              }
+              setTimeout(() => {
+                console.log(pager.on);
+              }, 1000);
+
+              childNodes = data.children.map((n) => self.renderConfig(h, n));
+              childNodes.unshift(h('div', [`~~~~~~~~~~~~~~~~~~~${this.tmpl}=${this.val}`]));
+              // const pager = childNodes[1];
+              return c(data.tag, option, childNodes);
+            },
+            created() {
+              console.log('CCCC RRRRR');
+            },
+          });
+        }
+        // hook VUE component instance
+        // return h(data.tag, option, childNodes);
+        return h(`test-comp-${data.id}`, {
+          ref: data.id,
+        });
       } else if (!data.ignore) {
+        // if (data.name === 'Pagination') {
+        //   debugger;
+        // }
+
         // dynamic component
         option.class['dynamic-comp'] = true;
         const eventReceiver = data.tag === 'div' ? 'on' : 'nativeOn';
@@ -398,10 +509,13 @@ export default {
 
       // FIXME Carousel doesn't watch interval props
       // must rerender;
-      if (data.name === 'Carousel' && data.rootElem) {
+      if ((data.name === 'Carousel' && data.rootElem)) {
         option.key = ComponentFactory.idGenerator();
       }
 
+      if (data.children) {
+        childNodes = data.children.map((n) => this.renderConfig(h, n));
+      }
       return h(data.tag, option, childNodes);
     },
     // onReceiveComponentAction
@@ -419,6 +533,7 @@ export default {
       };
     },
     channelParentDragExistedComp(data) {
+      // FIXME need clear this info while parent mouseup
       this.setDraggingInfo('prepare_move_component', data.data.id, data.data.name);
     },
     resetDraggingInfo() {
@@ -432,11 +547,6 @@ export default {
       this.deActiveComponent();
       const comp = findComponent(e.target);
       if (comp) {
-        // this.draggingInfo = {
-        //   type: 'prepare_move_component',
-        //   id: comp.getAttribute('data-id'),
-        //   name,
-        // };
         const name = comp.getAttribute('data-comp-name');
         this.setDraggingInfo('prepare_move_component', comp.getAttribute('data-id'), name);
       }
@@ -450,8 +560,20 @@ export default {
     },
     enterMoveCompDragging(e) {
       console.error('move ...');
+      // only used to check valid drag, drag target is being setted
+      // at previous step prepare_move_component
       const comp = findParentByClass(e.target, 'block')
                   || findParentByClass(e.target, 'dynamic-comp');
+
+      // check this.deaggingInfo.id is valid
+      const modPos = findModulePosition(this.compList, this.draggingInfo.id);
+      const module = modPos.list[modPos.index];
+      if (module.subElem) {
+        this.$message.error('无法直接拖拽子组件元素，请点击左上角选择整个组件!');
+        this.resetDraggingInfo();
+        return;
+      }
+
       if (comp) {
         this.isDragging = true;
         this.draggingInfo.type = 'move_component';
@@ -461,19 +583,18 @@ export default {
     handleUpdateComponentData(data) {
       const module = data.data;
       const ret = findModulePosition(this.compList, module.id);
-      console.log(module);
-      // console.log(module);
-      if (module.category === 'block') {
-        // ret.list[ret.index].props.data.content = '121212';
-        Vue.set(ret.list, ret.index, module);
-      } else {
-        Vue.set(ret.list, ret.index, module);
-      }
-      this.$forceUpdate();
+      Vue.set(ret.list, ret.index, module);
       this.$nextTick(() => {
-        // this.reportActiveCompPosition();
         this.reportUpdateCompPosition();
       });
+      this.channelClientSyncModuleList();
+    },
+    channelParentDeleteComp(data) {
+      const ret = findModulePosition(this.compList, data.data.id);
+      console.log(ret);
+      ret.list.splice(ret.index, 1);
+      this.deActiveComponent();
+      this.channelClientSyncModuleList();
     },
     channelFindCompHierarchy(data) {
       const paths = findModulePath(this.compList, data.data.id);
@@ -495,11 +616,12 @@ export default {
       console.log(data.data);
       this.reportPosition('hover_block', elem, data.data);
     },
-    channelParentDeleteComp(data) {
-      const ret = findModulePosition(this.compList, data.data.id);
-      console.log(ret);
-      ret.list.splice(ret.index, 1);
-      this.deActiveComponent();
+    // -------- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    channelClientSyncModuleList() {
+      this.sendBridgeMessage({
+        action: 'client_sync_module_list',
+        data: this.compList,
+      });
     },
     // sendMessage(data) {
     //   this.sendBridgeMessage(data);
@@ -508,12 +630,6 @@ export default {
      * *  method involve with parent end  **
      */
     downloadConfFile(d) {
-    //   const blob = new Blob([
-      // JSON.stringify(this.compList, undefined, 4),
-    //   ],
-    //   { type: 'application/json;charset=utf-8' });
-    //   saveAs(blob, 'site.json');
-    //   console.log()
       const data = getModuleMetadata(this.compList);
       console.log(JSON.stringify(data, undefined, 4));
       this.sendBridgeMessage({
@@ -522,19 +638,6 @@ export default {
           components: this.compList,
         },
       });
-      // this.$api.dynamicPages.save({
-      //   pageId: 5,
-      //   components: this.compList,
-      // }).then(res => {
-      //   if (res.code === 0) {
-      //     this.sendBridgeMessage({
-      //       token: d.token,
-      //       data: {
-      //         success: true,
-      //       }
-      //     });
-      //   }
-      // });
     },
     receiveMessage(msg) {
       if (msg.data.type !== 'bridge-message') { return; }
@@ -632,6 +735,7 @@ export default {
     ComponentFactory.restore(this.compList);
     const childNodes = this.compList.map((n) => this.renderConfig(h, n));
     const result = h('div', childNodes);
+    this.channelClientSyncModuleList();
     return result;
     // console.log(this.data);
     // return h('div', ['Text in Parent']);

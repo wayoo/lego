@@ -4,7 +4,6 @@
       <el-tab-pane label="配置">
         <div class="property-editor">
           <el-form ref="form" :model="form" :rules="rules"
-            @validate="onValidate"
             label-width="70px">
             <el-form-item label="模块id">
               <el-input v-model="form.id" disabled></el-input>
@@ -15,35 +14,55 @@
             <el-form-item label="所属模块">
               <el-input v-model="form.module" disabled></el-input>
             </el-form-item>
-            <template v-if="form.name === 'Text'">
-              <block-text :key="form.id" :data="form" @change="onChange"></block-text>
-            </template>
-            <template v-if="form.name === 'Columns' && form.tag === 'el-row'">
-              <div>
-                <layout-columns :data="form" @change="onChange"></layout-columns>
-              </div>
-            </template>
-            <template v-if="form.name === 'Flexs'">
-              <div>
-                <layout-flexs :key="form.id" :data="form" @change="onChange"></layout-flexs>
-              </div>
-            </template>
-            <template v-if="form.name === 'Container'">
-                <layout-container :key="form.id" :data="form" @change="onChange"></layout-container>
-            </template>
-            <template v-if="form.name === 'Tabs'">
-              <basic-tabs :key="form.id" :data="form" @change="onChange"></basic-tabs>
-            </template>
-            <template v-if="form.name === 'Carousel'">
-              <basic-carousel :key="form.id" :data="form" @change="onChange"></basic-carousel>
-            </template>
-            <template v-if="['Form', 'Switch'].includes(form.name)">
-              <form-index :key="form.id" :data="form" @change="onChange"></form-index>
-            </template>
+
+            <el-collapse v-model="activeNames" class="collapse">
+              <el-collapse-item title="Props" name="1">
+                <template v-if="form.name === 'Text'">
+                  <block-text :key="form.id" :data="form" @change="onChange"></block-text>
+                </template>
+                <template v-if="form.name === 'Columns' && form.tag === 'el-row'">
+                  <div>
+                    <layout-columns :data="form" @change="onChange"></layout-columns>
+                  </div>
+                </template>
+                <template v-if="form.name === 'Flexs'">
+                  <div>
+                    <layout-flexs :key="form.id" :data="form" @change="onChange"></layout-flexs>
+                  </div>
+                </template>
+                <template v-if="form.name === 'Container'">
+                    <layout-container :key="form.id" :data="form"
+                      @change="onChange"></layout-container>
+                </template>
+                <template v-if="form.name === 'Tabs'">
+                  <basic-tabs :key="form.id" :data="form" @change="onChange"></basic-tabs>
+                </template>
+                <template v-if="form.name === 'Carousel'">
+                  <basic-carousel :key="form.id" :data="form" @change="onChange"></basic-carousel>
+                </template>
+                <template v-if="['Form', 'Switch'].includes(form.name)">
+                  <form-index :key="form.id" :data="form" @change="onChange"></form-index>
+                </template>
+                <template v-if="form.name === 'Component'">
+                  <component-editor :key="form.id" :data="form"
+                    @change="onChange"></component-editor>
+                </template>
+                <template v-if="['Pagination'].includes(form.name)">
+                  <common-editor :key="form.id" :data="form" @change="onChange"></common-editor>
+                </template>
+              </el-collapse-item>
+
+              <el-collapse-item title="Events" name="2">
+                <CommonEvent :key="form.id" :data="form" @change="onChange"></CommonEvent>
+              </el-collapse-item>
+
+            </el-collapse>
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="配">配置管理</el-tab-pane>
+      <el-tab-pane label="结构">
+        <render-tree></render-tree>
+      </el-tab-pane>
       <el-tab-pane label="角">角色管理</el-tab-pane>
     </el-tabs>
   </div>
@@ -54,6 +73,7 @@
 import Messenger from '../common/messenger';
 const msgr = new Messenger('#work-frame');
 import { mapState, mapMutations, mapActions } from 'vuex';
+import renderTree from './renderTree';
 import layoutContainer from '../editor/layout/Container.vue';
 import layoutColumns from '../editor/layout/Columns.vue';
 import layoutFlexs from '../editor/layout/Flexs.vue';
@@ -61,6 +81,9 @@ import blockText from '../editor/block/Text.vue';
 import basicTabs from '../editor/basic/Tabs.vue';
 import basicCarousel from '../editor/basic/Carousel.vue';
 import FormIndex from '../editor/form/Index.vue';
+import ComponentEditor from '../editor/block/Component.vue';
+import CommonEditor from '../editor/Common.vue';
+import CommonEvent from '../editor/CommonEvent.vue';
 
 export default {
   components: {
@@ -75,11 +98,19 @@ export default {
     blockText,
     //
     FormIndex,
+    //
+    renderTree,
+    //
+    ComponentEditor,
+    //
+    CommonEditor,
+    CommonEvent,
   },
   data() {
     // const blockData = this.$store.state.editor.blockData;
 
     return {
+      activeNames: ['2'],
       form: {
         name: '',
       },
@@ -91,9 +122,6 @@ export default {
     };
   },
   computed: {
-    // ...mapState({
-      // blockData: (state) => state.editor.blockData,
-    // }),
     blockData: {
       get () {
         return this.$store.state.editor.blockData;
@@ -116,24 +144,12 @@ export default {
   methods: {
     ...mapMutations(['setBlockData']),
     ...mapActions(['syncBlockData', 'syncComponentData']),
-    onValidate(prop, valid, errTip) {
-      if (valid) {
-        // update to view
-        const data = {};
-        data.key = prop;
-        data.value = this.form[prop];
-        this.syncBlockData(data);
-      } else {
-        // restore to valid value
-        this.$refs.form.clearValidate();
-        this.form[prop] = this.blockData[prop];
-      }
-    },
     onChange() {
       console.log(JSON.stringify(this.form));
       const data = JSON.parse(JSON.stringify(this.form));
       // this.syncComponentData(this.form);
-      console.log(data);
+      // console.log(data);
+      // return;
       msgr.sendMessage({
         action: 'update_component_data',
         data,
@@ -181,7 +197,7 @@ export default {
   background-color: #2b2b2b;
   border-left: 1px solid #1a1a1a;
   padding: 0;
-  z-index: 16;
+  z-index: 20000;
   user-select: none;
   overflow-y: scroll;
 
@@ -205,6 +221,18 @@ export default {
 
   ::placeholder {
     color: rgb(115, 115, 115);
+  }
+
+  .collapse {
+    margin: 0 -15px;
+    padding: 0 15px;
+  }
+  .el-collapse-item__header,
+  .el-collapse-item__wrap {
+    background-color: #404040;
+  }
+  .el-collapse-item__content {
+    padding-bottom: 0;
   }
 }
 </style>

@@ -120,6 +120,7 @@ export default {
       'stateSetOutline',
       'stateShowOutline',
       'stateHideOutline',
+      'storeSetCompList'
     ]),
     onFrameScroll: debounce(function (data) {
       this.frame.scroll = data.scrollTop;
@@ -267,8 +268,8 @@ export default {
         case 'child_show_placeholder':
           this.updatePlaceholder(data.data);
           break;
-        case 'parent_show_comp_hierarchy':
-          this.
+        case 'client_sync_module_list':
+          this.storeSetCompList(data.data);
           break;
         default:
           // console.log('Unhandled action: ', data.action);
