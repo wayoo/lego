@@ -1,10 +1,12 @@
 <template>
   <div>
-    <div :key="item.id" v-for="(item, k) in form.tabs">
-      <el-form-item :label="`Tab ${k+1}`">
-        <el-input v-model="item.props.label"
-          @keydown.native="onKeyDown($event, 'width')"></el-input>
-      </el-form-item>
+    <div v-if="data.rootElem">
+      <div :key="item.id" v-for="(item, k) in form.tabs">
+        <el-form-item :label="`Tab ${k+1}`">
+          <el-input v-model="item.props.label"
+            @keydown.native="onKeyDown($event, 'width')"></el-input>
+        </el-form-item>
+      </div>
     </div>
   </div>
 </template>

@@ -24,14 +24,12 @@
       >
       </el-input>
 
-      <div>
-        <el-switch
-          v-if="item === Boolean || item.type === Boolean"
-          v-model="form[k]"
-          @change="onConfChange(k, ...arguments)"
-        >
-        </el-switch>
-      </div>
+      <el-switch
+        v-if="item === Boolean || item.type === Boolean"
+        v-model="form[k]"
+        @change="onConfChange(k, ...arguments)"
+      >
+      </el-switch>
 
       <el-select v-if="item.options"
         v-model="form[k]" placeholder="请选择"
@@ -45,16 +43,23 @@
         </el-option>
       </el-select>
 
-      <el-button size="mini" @click="onDialogOpen(item, k)">绑定</el-button>
+      <el-button
+        v-if="item.type === 'JSON'"
+        @click="onDialogOpen(item, k)"
+      >编辑</el-button>
+
+      <!-- <el-input type="textarea" rows="4"
+        v-model="form[k]"
+        @change="onConfChange(k, form[k])"></el-input> -->
     </el-form-item>
 
     <el-dialog
-      :title="`绑定 ${dialog.key}`"
+      title="提示"
       :visible.sync="dialogVisible"
       width="30%"
       @close="onDialogClose"
       >
-      <el-input v-model="dialog.value" type="textarea" rows="20"></el-input>
+      <el-input v-model="dialog.content" type="textarea" rows="20"></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
@@ -64,45 +69,20 @@
 </template>
 
 <script>
-const propertyKey = 'props';
-const confList = {
-  currentPage: {
-    type: Number,
-    default: 1,
-  },
-  pageSize: {
-    type: Number,
-    default: 10,
-  },
-  small: Boolean,
-  total: Number,
-  pageCount: Number,
-  pagerCount: {
-    type: Number,
-    validator(value) {
-      return (value || 0) === value && value > 4 && value < 22 && (value % 2) === 1;
+import { saveSiteData } from '../common/tasks';
+
+const propertyKey = 'tmplData';
+
+const confMap = {
+  Component: {
+    // eslint-disable-next-line quote-props
+    '模板数据': {
+      type: 'JSON',
     },
-    default: 7,
   },
-  // layout: {
-  //   default: 'prev, pager, next, jumper, ->, total',
-  // },
-  pageSizes: {
-    type: Array,
-    placeholder: '[10, 20, 30, 40, 50, 100]',
-    // default() {
-    //   return [10, 20, 30, 40, 50, 100];
-    // },
-  },
-  // popperClass: String,
-  prevText: String,
-  nextText: String,
-  background: Boolean,
-  disabled: Boolean,
-  // hideOnSinglePage: Boolean,
 };
 
-function restorePreviousValue(target, source) {
+function restorePreviousValue(target, source, confList) {
   // restore previous conf
   // eslint-disable-next-line
     for (const k in confList) {
@@ -125,18 +105,17 @@ export default {
     },
   },
   data() {
+    const confList = confMap[this.data.name] || {};
     // used to modify comp.dataProvider
-    const form = restorePreviousValue({}, this.data);
-    const propsBinds = this.data.propsBinds || {};
+    const form = restorePreviousValue({}, this.data, confList);
 
     return {
       confList,
       form,
-      propsBinds,
       dialogVisible: false,
       dialog: {
-        key: '',
-        value: '',
+        isShow: false,
+        content: '',
       },
     };
   },
@@ -160,29 +139,36 @@ export default {
       if (!this.data[propertyKey]) {
         this.data[propertyKey] = {};
       }
-      if (!this.data.propsBinds) {
-        this.data.propsBinds = {};
-      }
 
-      // set
       this.data[propertyKey][k] = val;
-      // unset
-      delete this.data.propsBinds[k];
-
       this.$emit('change');
     },
     onDialogOpen(item, key) {
       // item.value;
-      this.dialog.value = this.propsBinds[key];
+      this.dialog.content = JSON.stringify(this.data[propertyKey], null, 4);
       this.dialog.key = key;
       this.dialogVisible = true;
     },
     onDialogClose() {
-      if (!this.data.propsBinds) {
-        this.data.propsBinds = {};
+      console.log(this.dialog.content);
+      this.data[propertyKey] = this.data[propertyKey] || {};
+      // this.data[propertyKey][this.dialog.key] = this.dialog.content;
+      this.form[this.dialog.key] = this.dialog.content;
+      let tmplData = {};
+      try {
+        // eslint-disable-next-line no-eval
+        eval(`tmplData = ${this.dialog.content}`);
+      // eslint-disable-next-line no-empty
+      } catch (e) {
+        console.log(e);
       }
-      this.data.propsBinds[this.dialog.key] = this.dialog.value;
+      this.data[propertyKey] = tmplData;
+      this.data.key = new Date() - 0;
       this.$emit('change');
+      // TODO DNOT't use reload method
+      saveSiteData().then(() => {
+        location.reload();
+      });
     },
   },
 };

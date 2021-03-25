@@ -15,9 +15,7 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import Messenger from '../common/messenger';
-
-const msgr = new Messenger('#work-frame');
+import { saveSiteData } from '../common/tasks';
 
 export default {
   data() {
@@ -34,29 +32,7 @@ export default {
   methods: {
     ...mapMutations(['storeSetHostname']),
     generateConfig() {
-      msgr.sendMessage({
-        action: 'download_block_data',
-      }).then((data) => {
-        console.log(data);
-        // eslint-disable-next-line no-param-reassign
-        data.pageId = this.$route.params.id;
-        localStorage.setItem('__dp__conf', JSON.stringify(data));
-        // try {
-        //   this.$api.dynamicPages.save(data).then((res) => {
-        //     if (res.code === 0) {
-        //       this.$message({
-        //         message: '保存成功',
-        //         type: 'success',
-        //       });
-        //     }
-        //   });
-        // } catch (e) {
-        //   this.$message({
-        //     message: '非联网环境，请在业务后台操作保存!',
-        //     type: 'error',
-        //   });
-        // }
-      });
+      saveSiteData();
     },
     preview() {
       window.open('/dynamic/8');

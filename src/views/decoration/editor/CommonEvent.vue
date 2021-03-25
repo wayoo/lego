@@ -73,16 +73,16 @@ const propertyKey = 'events';
 
 const confMap = {
   Pagination: {
-    'size-change': {
-      type: 'Function',
-      value: `function (val) {
-    console.log(val)
-}`,
-    },
+//     'size-change': {
+//       type: 'Function',
+//       value: `function (val) {
+//     console.log(val)
+// }`,
+//     },
     'current-change': {
       type: 'Function',
       value: `function (val) {
-    this.val = val;
+    this.tmpl.val = val;
     this.$notify.info({
         message: '当前页面' + val
     });

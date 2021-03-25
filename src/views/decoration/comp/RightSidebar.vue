@@ -17,8 +17,8 @@
 
             <el-collapse v-model="activeNames" class="collapse">
               <el-collapse-item title="Props" name="1">
-                <template v-if="form.name === 'Text'">
-                  <block-text :key="form.id" :data="form" @change="onChange"></block-text>
+                <template v-if="form.name === 'Textarea'">
+                  <block-textarea :key="form.id" :data="form" @change="onChange"></block-textarea>
                 </template>
                 <template v-if="form.name === 'Columns' && form.tag === 'el-row'">
                   <div>
@@ -55,6 +55,9 @@
               <el-collapse-item title="Events" name="2">
                 <CommonEvent :key="form.id" :data="form" @change="onChange"></CommonEvent>
               </el-collapse-item>
+              <el-collapse-item title="Data" name="3" v-if="form.name === 'Component'">
+                <CommonData :key="form.id" :data="form" @change="onChange"></CommonData>
+              </el-collapse-item>
 
             </el-collapse>
           </el-form>
@@ -77,13 +80,14 @@ import renderTree from './renderTree';
 import layoutContainer from '../editor/layout/Container.vue';
 import layoutColumns from '../editor/layout/Columns.vue';
 import layoutFlexs from '../editor/layout/Flexs.vue';
-import blockText from '../editor/block/Text.vue';
+import blockTextarea from '../editor/block/Textarea.vue';
 import basicTabs from '../editor/basic/Tabs.vue';
 import basicCarousel from '../editor/basic/Carousel.vue';
 import FormIndex from '../editor/form/Index.vue';
 import ComponentEditor from '../editor/block/Component.vue';
 import CommonEditor from '../editor/Common.vue';
 import CommonEvent from '../editor/CommonEvent.vue';
+import CommonData from '../editor/CommonData.vue';
 
 export default {
   components: {
@@ -95,7 +99,7 @@ export default {
     basicTabs,
     basicCarousel,
     // blocks
-    blockText,
+    blockTextarea,
     //
     FormIndex,
     //
@@ -105,12 +109,13 @@ export default {
     //
     CommonEditor,
     CommonEvent,
+    CommonData,
   },
   data() {
     // const blockData = this.$store.state.editor.blockData;
 
     return {
-      activeNames: ['2'],
+      activeNames: ['2', '3'],
       form: {
         name: '',
       },

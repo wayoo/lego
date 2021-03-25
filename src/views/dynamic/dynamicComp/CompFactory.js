@@ -102,6 +102,17 @@ ComponentFactory.register('component', 'Component', () => {
   };
 });
 
+// eslint-disable-next-line arrow-body-style
+ComponentFactory.register('component', 'Text', () => {
+  return {
+    tag: 'div',
+    category: 'component',
+    name: 'Text',
+    id: idGenerator(),
+    children: ['sasas'],
+  };
+});
+
 ComponentFactory.register('block', 'Tabs', () => ({
   id: idGenerator(),
   name: 'Tabs',
@@ -165,10 +176,10 @@ ComponentFactory.register('block', 'Pagination', () => ({
   },
 }));
 
-ComponentFactory.register('block', 'Text', () => ({
+ComponentFactory.register('block', 'Textarea', () => ({
   tag: 'dynamic-block',
   id: idGenerator(),
-  name: 'Text',
+  name: 'Textarea',
   category: 'block',
   props: {
     data: {

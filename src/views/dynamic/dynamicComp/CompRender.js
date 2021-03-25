@@ -419,55 +419,57 @@ export default {
           Vue.component(`test-comp-${data.id}`, {
             data() {
               return {
-                tmpl: 'wangyu',
-                val: 4,
+                tmpl: data.tmplData || {},
               };
             },
             render(c) {
-              let vm = this;
-              const pager = data.children[0];
-              // console.log(JSON.stringify(data.children[0]));
+              const vm = this;
 
-              // eslint-disable-next-line no-param-reassign
-              // data.children[0].on['current-change'] = data.children[0].on['current-change'] || function (val) {
-              //   console.log(val);
-              //   t.val = val;
-              // };
-              // function evalInScope(js, contextAsScope) {
-              //   //# Return the results of the in-line anonymous function we .call with the passed context
-              //   return function() { with(this) { return eval(js); }; }.call(contextAsScope);
-              // }
-              if (pager) {
+              // eslint-disable-next-line
+              for (let i = 0, l = data.children.length; i < l; i++) {
+                const pager = data.children[i];
                 // eslint-disable-next-line no-param-reassign
-                data.children[0].props['current-page'] = this.val;
+                // data.children[0].props['current-page'] = this.val;
+                // pager.props['current-page'] = this.tmpl.val;
                 // eslint-disable-next-line no-param-reassign
-                data.children[0].on = data.children[0].on || {};
+                pager.on = pager.on || {};
                 // pager.events = undefined;
                 // eslint-disable-next-line
                 for (const fnKey in pager.events) {
                   const fnStr = pager.events[fnKey];
-                  const fnId = fnKey.replace('-', '');
+                  const fnId = fnKey.replace('-', '') + pager.id;
                   // eslint-disable-next-line
                   const s = `
                   vm.fn${fnId} = ${fnStr};
                   pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
                   // eslint-disable-next-line
                   eval(s);
-                  console.log(`====> bind: ${fnKey}`);
-                  // var result = function(str){
-                  //   // eslint-disable-next-line
-                  //   return eval(str);
-                  // }.call(this, s);
+                  console.log(`====> bind Function: ${fnKey}`);
+                }
+
+                // bind props
+                // eslint-disable-next-line
+                for (const propKey in pager.propsBinds) {
+                  const bindVal = pager.propsBinds[propKey];
+                  const s = `
+                  pager.props['${propKey}'] = this.${bindVal}
+                  `;
                   // eslint-disable-next-line
-                  // eval(`console.log(pager.on['${fnKey}'], '!!!!!')`);
+                  eval(s);
+                  console.log(`====> bind Props: ${propKey}`);
                 }
               }
-              setTimeout(() => {
-                console.log(pager.on);
-              }, 1000);
 
-              childNodes = data.children.map((n) => self.renderConfig(h, n));
-              childNodes.unshift(h('div', [`~~~~~~~~~~~~~~~~~~~${this.tmpl}=${this.val}`]));
+              childNodes = data.children.map((n) => {
+                if (n.category === 'component') {
+                  n.template = n.template || 'hell wolrD!';
+                  const node = self.renderConfig(h, n);
+                  console.log(node);
+                  return node;
+                }
+                return self.renderConfig(h, n);
+              });
+              childNodes.unshift(h('div', [`[TMPL DATA]~${JSON.stringify({ tmpl: this.tmpl })}`, h('br'), h('br')]));
               // const pager = childNodes[1];
               return c(data.tag, option, childNodes);
             },
