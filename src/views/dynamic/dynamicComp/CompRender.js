@@ -423,6 +423,7 @@ export default {
               };
             },
             render(c) {
+              // eslint-disable-next-line
               const vm = this;
 
               // eslint-disable-next-line
@@ -452,7 +453,7 @@ export default {
                 for (const propKey in pager.propsBinds) {
                   const bindVal = pager.propsBinds[propKey];
                   const s = `
-                  pager.props['${propKey}'] = this.${bindVal}
+                  pager.props.${propKey} = this.${bindVal}
                   `;
                   // eslint-disable-next-line
                   eval(s);
@@ -462,6 +463,7 @@ export default {
 
               childNodes = data.children.map((n) => {
                 if (n.category === 'component') {
+                  // eslint-disable-next-line
                   n.template = n.template || 'hell wolrD!';
                   const node = self.renderConfig(h, n);
                   console.log(node);
@@ -469,7 +471,15 @@ export default {
                 }
                 return self.renderConfig(h, n);
               });
-              childNodes.unshift(h('div', [`[TMPL DATA]~${JSON.stringify({ tmpl: this.tmpl })}`, h('br'), h('br')]));
+              childNodes.unshift(h('div', {
+                style: { 'white-space': 'pre-wrap' },
+              }, [
+                '==== [模板数据] ====',
+                h('br'),
+                `${JSON.stringify({ tmpl: this.tmpl }, null, '  ')}`,
+                h('br'),
+                h('br'),
+              ]));
               // const pager = childNodes[1];
               return c(data.tag, option, childNodes);
             },

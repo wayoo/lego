@@ -64,8 +64,8 @@
 </template>
 
 <script>
-const propertyKey = 'props';
-const confList = {
+// const propertyKey = 'props';
+const paginationConf = {
   currentPage: {
     type: Number,
     default: 1,
@@ -102,11 +102,27 @@ const confList = {
   // hideOnSinglePage: Boolean,
 };
 
-function restorePreviousValue(target, source) {
+const confMap = {
+  Textarea: {
+    confKey: 'props.data.content',
+    confList: {
+      currentPage: {
+        type: Number,
+        default: 1,
+      },
+    },
+  },
+  Pagination: {
+    confKey: 'props',
+    confList: paginationConf,
+  },
+};
+
+function restorePreviousValue(target, source, confKey, confList) {
   // restore previous conf
   // eslint-disable-next-line
     for (const k in confList) {
-    const val = source[propertyKey] && source[propertyKey][k];
+    const val = source[confKey] && source[confKey][k];
 
     // if (val) {
 
@@ -125,11 +141,13 @@ export default {
     },
   },
   data() {
+    const { confKey, confList } = confMap[this.data.name] || {};
     // used to modify comp.dataProvider
-    const form = restorePreviousValue({}, this.data);
+    const form = restorePreviousValue({}, this.data, confKey, confList);
     const propsBinds = this.data.propsBinds || {};
 
     return {
+      confKey,
       confList,
       form,
       propsBinds,
@@ -144,11 +162,11 @@ export default {
     onConfChange(k, val) {
       // eslint-disable-next-line
       // console.log(arguments);
-      if (confList[k].type === Number || confList[k] === Number) {
+      if (this.confList[k].type === Number || this.confList[k] === Number) {
         // eslint-disable-next-line
         val = val - 0;
       }
-      if (confList[k].type === Array || confList[k] === Array) {
+      if (this.confList[k].type === Array || this.confList[k] === Array) {
         try {
           // eslint-disable-next-line
           val = eval(val);
@@ -157,15 +175,15 @@ export default {
         }
       }
 
-      if (!this.data[propertyKey]) {
-        this.data[propertyKey] = {};
+      if (!this.data[this.confKey]) {
+        this.data[this.confKey] = {};
       }
       if (!this.data.propsBinds) {
         this.data.propsBinds = {};
       }
 
       // set
-      this.data[propertyKey][k] = val;
+      this.data[this.confKey][k] = val;
       // unset
       delete this.data.propsBinds[k];
 
@@ -174,6 +192,10 @@ export default {
     onDialogOpen(item, key) {
       // item.value;
       this.dialog.value = this.propsBinds[key];
+      // const s = `
+      // this.dialog.value = this.propsBinds[key];
+      // `;
+      // eval(s);
       this.dialog.key = key;
       this.dialogVisible = true;
     },
@@ -181,6 +203,7 @@ export default {
       if (!this.data.propsBinds) {
         this.data.propsBinds = {};
       }
+      this.propsBinds[this.dialog.key] = this.dialog.value;
       this.data.propsBinds[this.dialog.key] = this.dialog.value;
       this.$emit('change');
     },

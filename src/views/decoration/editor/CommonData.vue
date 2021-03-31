@@ -121,6 +121,7 @@ export default {
   },
   methods: {
     onConfChange(k, val) {
+      const { confList } = this;
       // eslint-disable-next-line
       // console.log(arguments);
       if (confList[k].type === Number || confList[k] === Number) {
@@ -154,7 +155,7 @@ export default {
       this.data[propertyKey] = this.data[propertyKey] || {};
       // this.data[propertyKey][this.dialog.key] = this.dialog.content;
       this.form[this.dialog.key] = this.dialog.content;
-      let tmplData = {};
+      const tmplData = {};
       try {
         // eslint-disable-next-line no-eval
         eval(`tmplData = ${this.dialog.content}`);
@@ -165,10 +166,13 @@ export default {
       this.data[propertyKey] = tmplData;
       this.data.key = new Date() - 0;
       this.$emit('change');
-      // TODO DNOT't use reload method
-      saveSiteData().then(() => {
-        location.reload();
-      });
+      setTimeout(() => {
+        // TODO DNOT't use reload method
+        saveSiteData().then(() => {
+          // eslint-disable-next-line no-restricted-globals
+          location.reload();
+        });
+      }, 100);
     },
   },
 };

@@ -51,4 +51,11 @@ html, body {
     }
   }
 }
+
+div[data-comp-name="Section"]:not(.comp-empty) {
+  padding: 10px;
+}
+div[data-comp-name="Container"]:not(.comp-empty) {
+  padding: 10px;
+}
 </style>

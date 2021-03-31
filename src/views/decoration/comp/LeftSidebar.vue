@@ -58,7 +58,7 @@ export default {
           title: '组件工厂',
           items: [
             { name: 'Component', id: 'Component' },
-            { name: 'Text', id: 'Text' },
+            // { name: 'Text', id: 'Text' },
           ],
         },
         {
