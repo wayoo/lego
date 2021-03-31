@@ -69,8 +69,6 @@
 </template>
 
 <script>
-import { saveSiteData } from '../common/tasks';
-
 const propertyKey = 'tmplData';
 
 const confMap = {
@@ -166,13 +164,6 @@ export default {
       this.data[propertyKey] = tmplData;
       this.data.key = new Date() - 0;
       this.$emit('change');
-      setTimeout(() => {
-        // TODO DNOT't use reload method
-        saveSiteData().then(() => {
-          // eslint-disable-next-line no-restricted-globals
-          location.reload();
-        });
-      }, 100);
     },
   },
 };

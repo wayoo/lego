@@ -335,7 +335,7 @@ export default {
       option.on = data.on || {};
       option.nativeOn = data.nativeOn || {};
       option.ref = data.ref || data.id;
-      option.key = data.id;
+      option.key = data.key || data.id;
 
       // nativeOn only valid on component
       if (data.tag === 'div') {
@@ -414,9 +414,9 @@ export default {
         };
       } else if (data.name === 'Component' && data.children.length) {
         const self = this;
-        if (!componentInstances[`test-comp-${data.id}`]) {
-          componentInstances[`test-comp-${data.id}`] = true;
-          Vue.component(`test-comp-${data.id}`, {
+        if (!componentInstances[`test-comp-${option.key}`]) {
+          componentInstances[`test-comp-${option.key}`] = true;
+          Vue.component(`test-comp-${option.key}`, {
             data() {
               return {
                 tmpl: data.tmplData || {},
@@ -484,13 +484,12 @@ export default {
               return c(data.tag, option, childNodes);
             },
             created() {
-              console.log('CCCC RRRRR');
+              console.log('CCCC RRRRR', data.tmplData, data);
             },
           });
         }
         // hook VUE component instance
-        // return h(data.tag, option, childNodes);
-        return h(`test-comp-${data.id}`, {
+        return h(`test-comp-${option.key}`, {
           ref: data.id,
         });
       } else if (!data.ignore) {
