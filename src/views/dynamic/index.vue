@@ -80,6 +80,22 @@ export default {
                       },
                       children: [
                         {
+                          tag: 'dynamic-block',
+                          id: 'c_16171654365622',
+                          name: 'Textarea',
+                          category: 'block',
+                          props: {
+                            data: {
+                              content: null,
+                            },
+                            name: 'Textarea',
+                          },
+                          on: {},
+                          propsBinds: {
+                            'data.content': 'tmpl.val',
+                          },
+                        },
+                        {
                           id: 'c_16166533664524',
                           name: 'Pagination',
                           tag: 'el-pagination',
@@ -99,7 +115,7 @@ export default {
                           props: {
                             total: 50,
                             'current-page': 3,
-                            currentPage: 5,
+                            currentPage: 4,
                           },
                           on: {},
                           events: {
@@ -112,7 +128,7 @@ export default {
                       ],
                       tmplData: {
                         name: 1212,
-                        val: 5,
+                        val: 4,
                       },
                       key: 1616653375082,
                     },
