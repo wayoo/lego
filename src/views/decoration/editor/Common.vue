@@ -45,7 +45,10 @@
         </el-option>
       </el-select>
 
-      <el-button size="mini" @click="onDialogOpen(item, k)">绑定</el-button>
+      <el-button size="mini" :plain="true"
+        :type="propsBinds[k] ? 'primary' : ''"
+        @click="onDialogOpen(item, k)">
+          {{ propsBinds[k] ? '已绑定' : '绑定'  }}</el-button>
     </el-form-item>
 
     <el-dialog
@@ -203,7 +206,8 @@ export default {
       if (!this.data.propsBinds) {
         this.data.propsBinds = {};
       }
-      this.propsBinds[this.dialog.key] = this.dialog.value;
+      // this.propsBinds[this.dialog.key] = this.dialog.value;
+      this.$set(this.propsBinds, this.dialog.key, this.dialog.value);
       this.data.propsBinds[this.dialog.key] = this.dialog.value;
       this.$emit('change');
     },

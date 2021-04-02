@@ -1,6 +1,9 @@
 <template>
   <div>
-      <el-button size="mini" @click="onDialogOpen(item, k)">绑定</el-button>
+      <el-button class="btn" size="mini"
+        :plain="true"
+        :type="propsBinds[k] ? 'primary' : ''"
+        @click="onDialogOpen(item, k)">{{ propsBinds[k] ? '已绑定' : '绑定' }}</el-button>
       <el-input type="textarea" rows="20" v-model="form.content"
         @input="onContentChange"></el-input>
 
@@ -63,7 +66,7 @@ export default {
         this.data.propsBinds = {};
       }
       // save to current model
-      this.propsBinds[this.dialog.key] = this.dialog.value;
+      this.$set(this.propsBinds, this.dialog.key, this.dialog.value);
       // save to data model
       this.data.propsBinds[this.dialog.key] = this.dialog.value;
       this.$emit('change');
@@ -71,3 +74,9 @@ export default {
   },
 };
 </script>
+
+<style lang="less" scoped>
+.btn {
+  margin-bottom: 10px;
+}
+</style>

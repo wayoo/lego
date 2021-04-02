@@ -1,3 +1,7 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-eval */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-restricted-syntax */
 import Vue from 'vue';
 import { mapState, mapMutations } from 'vuex';
 import DynamicBlock from './DynamicBlock.vue';
@@ -426,38 +430,30 @@ export default {
               // eslint-disable-next-line
               const vm = this;
 
-              // eslint-disable-next-line
               for (let i = 0, l = data.children.length; i < l; i++) {
                 const pager = data.children[i];
-                // eslint-disable-next-line no-param-reassign
-                // data.children[0].props['current-page'] = this.val;
-                // pager.props['current-page'] = this.tmpl.val;
-                // eslint-disable-next-line no-param-reassign
                 pager.on = pager.on || {};
-                // pager.events = undefined;
-                // eslint-disable-next-line
                 for (const fnKey in pager.events) {
                   const fnStr = pager.events[fnKey];
-                  const fnId = fnKey.replace('-', '') + pager.id;
-                  // eslint-disable-next-line
-                  const s = `
-                  vm.fn${fnId} = ${fnStr};
-                  pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
-                  // eslint-disable-next-line
-                  eval(s);
-                  console.log(`====> bind Function: ${fnKey}`);
+                  if (fnStr) {
+                    const fnId = fnKey.replace('-', '') + pager.id;
+                    const s = `
+                    vm.fn${fnId} = ${fnStr};
+                    pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
+                    eval(s);
+                    console.log(`====> bind Function: ${fnKey}`);
+                  }
                 }
-
                 // bind props
-                // eslint-disable-next-line
                 for (const propKey in pager.propsBinds) {
                   const bindVal = pager.propsBinds[propKey];
-                  const s = `
-                  pager.props.${propKey} = this.${bindVal}
-                  `;
-                  // eslint-disable-next-line
-                  eval(s);
-                  console.log(`====> bind Props: ${propKey}`);
+                  if (bindVal) {
+                    const s = `
+                    pager.props.${propKey} = this.${bindVal}
+                    `;
+                    eval(s);
+                    console.log(`====> bind Props: ${propKey}`);
+                  }
                 }
               }
 
