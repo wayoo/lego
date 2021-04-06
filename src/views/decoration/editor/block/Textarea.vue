@@ -7,9 +7,10 @@
       <el-input type="textarea" rows="20" v-model="form.content"
         @input="onContentChange"></el-input>
 
-      <el-dialog
+    <el-dialog
       :title="`绑定 ${dialog.key}`"
       :visible.sync="dialogVisible"
+      :modal-append-to-body="false"
       width="30%"
       @close="onDialogClose"
       >

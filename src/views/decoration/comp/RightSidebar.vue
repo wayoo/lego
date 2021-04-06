@@ -66,7 +66,16 @@
       <el-tab-pane label="结构">
         <render-tree></render-tree>
       </el-tab-pane>
-      <el-tab-pane label="角">角色管理</el-tab-pane>
+      <el-tab-pane label="角">
+        <el-select v-model="value" placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -115,6 +124,23 @@ export default {
     // const blockData = this.$store.state.editor.blockData;
 
     return {
+      options: [{
+          value: '选项1',
+          label: '黄金糕'
+        }, {
+          value: '选项2',
+          label: '双皮奶'
+        }, {
+          value: '选项3',
+          label: '蚵仔煎'
+        }, {
+          value: '选项4',
+          label: '龙须面'
+        }, {
+          value: '选项5',
+          label: '北京烤鸭'
+        }],
+      value: '',
       activeNames: ['2', '3'],
       form: {
         name: '',
@@ -202,7 +228,7 @@ export default {
   background-color: #2b2b2b;
   border-left: 1px solid #1a1a1a;
   padding: 0;
-  z-index: 20000;
+  z-index: 16;
   user-select: none;
   overflow-y: scroll;
 

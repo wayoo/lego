@@ -15,9 +15,9 @@ const routes = [
     component: () => import('../views/decoration/index.vue'),
   },
   {
-    path: '/dynamic/:id',
+    path: '/client/:id',
     name: 'dynamicPages',
-    component: () => import('../views/dynamic/index.vue'),
+    component: () => import('../views/client/index.vue'),
   },
 ];
 

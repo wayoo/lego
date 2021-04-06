@@ -6,6 +6,7 @@ import Vue from 'vue';
 import { mapState, mapMutations } from 'vuex';
 import DynamicBlock from './DynamicBlock.vue';
 import ComponentFactory from './CompFactory';
+import EventEmitter from './EventEmitter';
 import { findModulePosition, findModulePath, getModuleMetadata } from './utils';
 
 function scrollTop() {
@@ -740,6 +741,8 @@ export default {
     //
     this.compList = this.data;
     ComponentFactory.restore(this.compList);
+    console.log('render .... <<<<<');
+    this.event = new EventEmitter();
     const childNodes = this.compList.map((n) => this.renderConfig(h, n));
     const result = h('div', childNodes);
     this.channelClientSyncModuleList();

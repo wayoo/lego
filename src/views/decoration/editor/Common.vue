@@ -54,6 +54,7 @@
     <el-dialog
       :title="`绑定 ${dialog.key}`"
       :visible.sync="dialogVisible"
+      :modal-append-to-body="false"
       width="30%"
       @close="onDialogClose"
       >

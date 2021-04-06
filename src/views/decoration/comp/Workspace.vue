@@ -52,7 +52,7 @@
     </div>
 
     <iframe id="work-frame" ref="frame" class="work-frame"
-      :src="`/dynamic/${pageId}`" frameborder="0"></iframe>
+      :src="`/client/${pageId}`" frameborder="0"></iframe>
     <!-- <iframe id="work-frame" ref="frame" class="work-frame" src="http://localhost:8809/" frameborder="0"></iframe> -->
     <!-- <div class="page" ref="pageRoot"> -->
     <!-- </div> -->
