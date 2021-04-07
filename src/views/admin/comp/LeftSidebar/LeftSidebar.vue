@@ -60,7 +60,6 @@ const compTempList = [
     title: '基础 Basic',
     items: [
       { name: 'Tabs', id: 'Tabs' },
-      { name: 'Carousel', id: 'Carousel' },
     ],
   },
   {

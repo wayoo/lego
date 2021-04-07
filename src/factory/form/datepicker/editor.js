@@ -43,6 +43,7 @@ export default {
     align: {
       type: String,
       default: 'left',
+      options: ['left', 'center', 'right'],
     },
     value: {},
     defaultValue: {},
