@@ -61,7 +61,6 @@ const compTempList = [
     items: [
       { name: 'Tabs', id: 'Tabs' },
       { name: 'Carousel', id: 'Carousel' },
-      { name: 'Pagination', id: 'Pagination' },
     ],
   },
   {

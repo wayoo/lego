@@ -459,7 +459,6 @@ export default {
                       console.log(`====> bind Function: ${fnKey}`);
                     }
                   }
-                  console.log(Object.keys(pager.on), pager.on, pager, pager.props);
                 }
               },
               bindProps() {
@@ -483,7 +482,6 @@ export default {
               },
             },
             render(c) {
-              console.log('~~~~~~~~~~~~~~~~~~~~~~~');
               // need to invoke every time because props data needed in
               // child component should be updated manually
               if (true || !this.inited) {
@@ -510,10 +508,7 @@ export default {
               return c(data.tag, option, childNodes);
             },
             created() {
-              console.log('CCCC RRRRR', this, data);
-            },
-            updated() {
-              console.log('*******************', this);
+              console.log('CCCC RRRRR');
             },
           });
         }
