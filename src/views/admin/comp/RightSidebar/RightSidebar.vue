@@ -55,7 +55,7 @@
               <el-collapse-item title="Events" name="2">
                 <CommonEvent :key="form.id" :data="form" @change="onChange"></CommonEvent>
               </el-collapse-item>
-              <el-collapse-item title="Data" name="3" v-if="form.name === 'Component'">
+              <el-collapse-item title="Data" name="3">
                 <CommonData :key="form.id" :data="form" @change="onChange"></CommonData>
               </el-collapse-item>
 

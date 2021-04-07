@@ -11,7 +11,7 @@ export default {
         'week', 'datetime', 'datetimerange',
         'daterange', 'monthrange',
       ],
-      // forceUpdate: true,
+      forceUpdate: true,
     },
     format: String,
     valueFormat: String,
@@ -61,7 +61,9 @@ export default {
     'change': {
       type: 'Function',
       value: `function (val) {
-  console.log(val);
+  this.$notify.info({
+      message: '当前时间' + val
+  });
 }
       `,
     },

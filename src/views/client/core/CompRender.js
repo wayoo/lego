@@ -435,15 +435,17 @@ export default {
                   const pager = data.children[i];
                   pager.on = pager.on || {};
                   // inject v-model hooks
-                  const valKey = `val${pager.id}`;
-                  console.log(vm[valKey]);
-                  const vModelScript = `
-                  // hacker for v-model binding
-                  pager.on.input = function(val) {
-                    vm.tmpl.name = val;
+                  if (pager.vModelBind) {
+                    const bindVal = pager.vModelBind;
+                    const vModelScript = `
+                    // hacker for v-model binding
+                    pager.on.input = function(val) {
+                      vm.${bindVal} = val;
+                    }
+                    pager.props.value = this.${bindVal}
+                    `;
+                    eval(vModelScript);
                   }
-                  `;
-                  eval(vModelScript);
 
                   // custom specified events
                   for (const fnKey in pager.events) {
@@ -466,10 +468,6 @@ export default {
                 for (let i = 0, l = data.children.length; i < l; i++) {
                   const pager = data.children[i];
                   // pager.on = pager.on || {};
-                  // hack for v-model workking properly
-                  pager.propsBinds = pager.propsBinds || {
-                    value: 'tmpl.name',
-                  };
                   // bind props
                   for (const propKey in pager.propsBinds) {
                     const bindVal = pager.propsBinds[propKey];
