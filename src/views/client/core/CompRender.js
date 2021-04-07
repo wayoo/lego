@@ -427,63 +427,78 @@ export default {
                 tmpl: data.tmplData || {},
               };
             },
+            methods: {
+              bindEvents() {
+                // eslint-disable-next-line
+                const vm = this;
+                for (let i = 0, l = data.children.length; i < l; i++) {
+                  const pager = data.children[i];
+                  pager.on = pager.on || {};
+                  // inject v-model hooks
+                  const valKey = `val${pager.id}`;
+                  console.log(vm[valKey]);
+                  const vModelScript = `
+                  // hacker for v-model binding
+                  pager.on.input = function(val) {
+                    vm.tmpl.name = val;
+                  }
+                  `;
+                  eval(vModelScript);
+
+                  // custom specified events
+                  for (const fnKey in pager.events) {
+                    const fnStr = pager.events[fnKey];
+                    if (fnStr) {
+                      const fnId = fnKey.replace('-', '') + pager.id;
+                      const s = `
+                      vm.fn${fnId} = ${fnStr};
+                      pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
+                      eval(s);
+                      console.log(`====> bind Function: ${fnKey}`);
+                    }
+                  }
+                  console.log(Object.keys(pager.on), pager.on, pager, pager.props);
+                }
+              },
+              bindProps() {
+                // eslint-disable-next-line
+                const vm = this;
+                for (let i = 0, l = data.children.length; i < l; i++) {
+                  const pager = data.children[i];
+                  // pager.on = pager.on || {};
+                  // hack for v-model workking properly
+                  pager.propsBinds = pager.propsBinds || {
+                    value: 'tmpl.name',
+                  };
+                  // bind props
+                  for (const propKey in pager.propsBinds) {
+                    const bindVal = pager.propsBinds[propKey];
+                    if (bindVal) {
+                      const s = `
+                      pager.props.${propKey} = this.${bindVal}
+                      `;
+                      eval(s);
+                      console.log(`====> bind Props: ${propKey}`);
+                    }
+                  }
+                }
+              },
+            },
             render(c) {
-              // eslint-disable-next-line
-              const vm = this;
-
-              for (let i = 0, l = data.children.length; i < l; i++) {
-                const pager = data.children[i];
-                pager.on = pager.on || {};
-                for (const fnKey in pager.events) {
-                  const fnStr = pager.events[fnKey];
-                  if (fnStr) {
-                    // const valKey = `val${pager.id}`;
-                    const fnId = fnKey.replace('-', '') + pager.id;
-                    const s = `
-                    vm.fn${fnId} = ${fnStr};
-                    pager.on.input = (function (comp) {
-                      return function(val) {
-                        console.log(val, 'xxxx', comp.props, this);
-                        try {
-                          comp.props.value = val;
-                        } catch (e) {
-                          console.log(e);
-                        }
-                      }
-                    })(pager);
-                    pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
-                    eval(s);
-                    console.log(`====> bind Function: ${fnKey}`);
-                  }
-                }
-                console.log(Object.keys(pager.on), pager.on, pager.key, pager.props);
-
-                pager.propsBinds = pager.propsBinds || {
-                  value: 'tmpl.name',
-                };
-                // bind props
-                for (const propKey in pager.propsBinds) {
-                  const bindVal = pager.propsBinds[propKey];
-                  if (bindVal) {
-                    const s = `
-                    pager.props.${propKey} = this.${bindVal}
-                    `;
-                    eval(s);
-                    console.log(`====> bind Props: ${propKey}`);
-                  }
-                }
+              console.log('~~~~~~~~~~~~~~~~~~~~~~~');
+              // need to invoke every time because props data needed in
+              // child component should be updated manually
+              if (true || !this.inited) {
+                this.inited = true;
+                this.bindEvents();
+                this.bindProps();
               }
-
               childNodes = data.children.map((n) => {
-                if (n.category === 'component') {
-                  // eslint-disable-next-line
-                  n.template = n.template || 'hell wolrD!';
-                  const node = self.renderConfig(h, n);
-                  console.log(node);
-                  return node;
-                }
                 return self.renderConfig(h, n);
               });
+              /** ************************************
+               * debug start
+               */
               childNodes.unshift(h('div', {
                 style: { 'white-space': 'pre-wrap' },
               }, [
@@ -493,11 +508,14 @@ export default {
                 h('br'),
                 h('br'),
               ]));
-              // const pager = childNodes[1];
+              // ********* debug end ****************
               return c(data.tag, option, childNodes);
             },
             created() {
-              console.log('CCCC RRRRR', data.tmplData, data);
+              console.log('CCCC RRRRR', this, data);
+            },
+            updated() {
+              console.log('*******************', this);
             },
           });
         }
@@ -756,7 +774,7 @@ export default {
   render(h) {
     //
     this.compList = this.data;
-    ComponentFactory.restore(this.compList);
+    // ComponentFactory.restore(this.compList);
     console.log('render .... <<<<<');
     this.event = new EventEmitter();
     const childNodes = this.compList.map((n) => this.renderConfig(h, n));

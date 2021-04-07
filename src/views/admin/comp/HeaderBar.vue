@@ -35,7 +35,7 @@ export default {
       saveSiteData();
     },
     preview() {
-      window.open('/dynamic/8');
+      window.open('/client/8');
       // window.open(`https://${this.hostname}${this.preview_path}`);
     },
     onKeyDown(e) {
