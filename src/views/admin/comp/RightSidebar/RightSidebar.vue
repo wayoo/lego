@@ -11,9 +11,9 @@
             <el-form-item label="模块名" prop="name">
               <el-input v-model="form.name" ></el-input>
             </el-form-item>
-            <el-form-item label="所属模块">
+            <!-- <el-form-item label="所属模块">
               <el-input v-model="form.module" disabled></el-input>
-            </el-form-item>
+            </el-form-item> -->
 
             <el-collapse v-model="activeNames" class="collapse">
               <el-collapse-item title="Props" name="1">
@@ -43,12 +43,12 @@
                 <template v-if="['Form', 'Switch'].includes(form.name)">
                   <form-index :key="form.id" :data="form" @change="onChange"></form-index>
                 </template>
-                <template v-if="form.name === 'Component'">
+                <!-- <template v-if="form.name === 'Component'">
                   <component-editor :key="form.id" :data="form"
                     @change="onChange"></component-editor>
-                </template>
-                <template v-if="['Pagination'].includes(form.name)">
-                  <common-editor :key="form.id" :data="form" @change="onChange"></common-editor>
+                </template> -->
+                <template>
+                  <CommonProps :key="form.id" :data="form" @change="onChange"></CommonProps>
                 </template>
               </el-collapse-item>
 
@@ -66,37 +66,27 @@
       <el-tab-pane label="结构">
         <render-tree></render-tree>
       </el-tab-pane>
-      <el-tab-pane label="角">
-        <el-select v-model="value" placeholder="请选择">
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
-import Messenger from '../common/messenger';
+import Messenger from '../../common/messenger';
 const msgr = new Messenger('#work-frame');
 import { mapState, mapMutations, mapActions } from 'vuex';
-import renderTree from './renderTree';
-import layoutContainer from '../editor/layout/Container.vue';
-import layoutColumns from '../editor/layout/Columns.vue';
-import layoutFlexs from '../editor/layout/Flexs.vue';
-import blockTextarea from '../editor/block/Textarea.vue';
-import basicTabs from '../editor/basic/Tabs.vue';
-import basicCarousel from '../editor/basic/Carousel.vue';
-import FormIndex from '../editor/form/Index.vue';
-import ComponentEditor from '../editor/block/Component.vue';
-import CommonEditor from '../editor/Common.vue';
-import CommonEvent from '../editor/CommonEvent.vue';
-import CommonData from '../editor/CommonData.vue';
+import renderTree from '../renderTree';
+import layoutContainer from './editor/layout/Container.vue';
+import layoutColumns from './editor/layout/Columns.vue';
+import layoutFlexs from './editor/layout/Flexs.vue';
+import blockTextarea from './editor/block/Textarea.vue';
+import basicTabs from './editor/basic/Tabs.vue';
+import basicCarousel from './editor/basic/Carousel.vue';
+import FormIndex from './editor/form/Index.vue';
+import ComponentEditor from './editor/block/Component.vue';
+import CommonProps from './editor/CommonProps.vue';
+import CommonEvent from './editor/CommonEvent.vue';
+import CommonData from './editor/CommonData.vue';
 
 export default {
   components: {
@@ -116,7 +106,7 @@ export default {
     //
     ComponentEditor,
     //
-    CommonEditor,
+    CommonProps,
     CommonEvent,
     CommonData,
   },
@@ -124,23 +114,6 @@ export default {
     // const blockData = this.$store.state.editor.blockData;
 
     return {
-      options: [{
-          value: '选项1',
-          label: '黄金糕'
-        }, {
-          value: '选项2',
-          label: '双皮奶'
-        }, {
-          value: '选项3',
-          label: '蚵仔煎'
-        }, {
-          value: '选项4',
-          label: '龙须面'
-        }, {
-          value: '选项5',
-          label: '北京烤鸭'
-        }],
-      value: '',
       activeNames: ['2', '3'],
       form: {
         name: '',
@@ -218,52 +191,5 @@ export default {
 };
 </script>
 
-<style lang="less">
-.right-side-bar {
-  position: fixed;
-  width: 241px;
-  height: 100%;
-  right: 0;
-  top: 0px;
-  background-color: #2b2b2b;
-  border-left: 1px solid #1a1a1a;
-  padding: 0;
-  z-index: 16;
-  user-select: none;
-  overflow-y: scroll;
-
-  color: #d9d9d9;
-
-  .property-editor {
-    word-break: break-all;
-  }
-
-  .el-input_inner {
-    color: rgb(217, 217, 217);
-    background: rgb(94, 94, 94);
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgb(51, 51, 51);
-  }
-
-  .el-tabs__content {
-    background: #404040;
-  }
-
-  ::placeholder {
-    color: rgb(115, 115, 115);
-  }
-
-  .collapse {
-    margin: 0 -15px;
-    padding: 0 15px;
-  }
-  .el-collapse-item__header,
-  .el-collapse-item__wrap {
-    background-color: #404040;
-  }
-  .el-collapse-item__content {
-    padding-bottom: 0;
-  }
-}
+<style lang="less" src="./RightSidebar.less">
 </style>

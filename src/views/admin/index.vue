@@ -9,9 +9,9 @@
 
 <script>
 import 'element-theme-dark';
-import LeftSidebar from './comp/LeftSidebar.vue';
+import LeftSidebar from './comp/LeftSidebar/LeftSidebar.vue';
 import HeaderBar from './comp/HeaderBar.vue';
-import RightSidebar from './comp/RightSidebar.vue';
+import RightSidebar from './comp/RightSidebar/RightSidebar.vue';
 import Workspace from './comp/Workspace.vue';
 
 export default {

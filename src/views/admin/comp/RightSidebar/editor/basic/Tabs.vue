@@ -13,7 +13,7 @@
 
 <script>
 // import { idGenerator } from '../../common/utils';
-import { idGenerator } from '../../common/utils';
+import { idGenerator } from '../../../../common/utils';
 
 /* eslint-disable no-underscore-dangle */
 export default {

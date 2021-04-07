@@ -6,19 +6,6 @@
 
 <script>
 export default {
-  // methods: {
-  //   receiveMessage(data) {
-  //     if (data.data.type === 'bridge-message') {
-  //       this.$root.$emit('bridge-message', data.data.data);
-  //     }
-  //   },
-  // },
-  // mounted() {
-  //   window.addEventListener('message', this.receiveMessage);
-  // },
-  // beforeDestroy() {
-  //   window.removeEventListener('message', this.receiveMessage);
-  // },
 };
 </script>
 

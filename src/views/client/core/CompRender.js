@@ -437,14 +437,30 @@ export default {
                 for (const fnKey in pager.events) {
                   const fnStr = pager.events[fnKey];
                   if (fnStr) {
+                    // const valKey = `val${pager.id}`;
                     const fnId = fnKey.replace('-', '') + pager.id;
                     const s = `
                     vm.fn${fnId} = ${fnStr};
+                    pager.on.input = (function (comp) {
+                      return function(val) {
+                        console.log(val, 'xxxx', comp.props, this);
+                        try {
+                          comp.props.value = val;
+                        } catch (e) {
+                          console.log(e);
+                        }
+                      }
+                    })(pager);
                     pager.on['${fnKey}'] = function() { vm.fn${fnId}.apply(vm, arguments); }`;
                     eval(s);
                     console.log(`====> bind Function: ${fnKey}`);
                   }
                 }
+                console.log(Object.keys(pager.on), pager.on, pager.key, pager.props);
+
+                pager.propsBinds = pager.propsBinds || {
+                  value: 'tmpl.name',
+                };
                 // bind props
                 for (const propKey in pager.propsBinds) {
                   const bindVal = pager.propsBinds[propKey];

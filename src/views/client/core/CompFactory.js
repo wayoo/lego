@@ -21,6 +21,9 @@ ComponentFactory.create = function (category, name) {
   let comp;
   let fn;
   switch (category) {
+    case 'root':
+      comp = this.createRootComponent();
+      break;
     case 'block':
       fn = factorys[category] && factorys[category][name];
       if (fn) {
@@ -32,22 +35,34 @@ ComponentFactory.create = function (category, name) {
     case 'layout':
     case 'form':
     case 'component':
+    default:
       fn = factorys[category] && factorys[category][name];
       if (fn) {
         comp = fn();
       } else {
-        // not registerd module type
-        console.error(`module type [${name}] is not defined! `);
-        comp = null;
+        // @see https://stackoverflow.com/questions/42797313/webpack-dynamic-module-loader-by-require
+        // eslint-disable-next-line
+        const asyncModule = require(`@/factory/${category}/${name}/init.js`);
+
+        if (asyncModule) {
+          console.log(asyncModule.default);
+          // eslint-disable-next-line arrow-body-style
+          ComponentFactory.register(category, name, asyncModule.default);
+          fn = factorys[category][name];
+          comp = fn();
+        } else {
+          // not registerd module type
+          console.error(`module type [${category}] ${name} is not defined! `);
+          comp = null;
+        }
       }
       break;
-    case 'root':
-      comp = this.createRootComponent();
-      break;
-    default:
-      console.log('un handled create');
-      break;
+    // default:
+    //   console.log('un handled create');
+    //   break;
   }
+  comp.category = category;
+  comp.name = name;
   return comp;
 };
 
@@ -64,10 +79,8 @@ ComponentFactory.createBlock = function (name) {
     tag: 'dynamic-block',
     id: idGenerator(),
     name,
-    category: 'block',
     props: {
       data: {
-        IS_COMP_ADDING: true,
       },
     },
   };
@@ -106,7 +119,6 @@ ComponentFactory.register('component', 'Component', () => {
 ComponentFactory.register('component', 'Text', () => {
   return {
     tag: 'div',
-    category: 'component',
     name: 'Text',
     id: idGenerator(),
     children: ['sasas'],
@@ -142,48 +154,14 @@ ComponentFactory.register('block', 'Tabs', () => ({
   ],
 }));
 
-ComponentFactory.register('block', 'Carousel', () => ({
-  id: idGenerator(),
-  name: 'Carousel',
-  tag: 'el-carousel',
-  rootElem: true,
-  props: {
-    autoplay: false,
-    interval: 3000,
-  },
-  children: [
-    {
-      tag: 'el-carousel-item',
-      id: idGenerator(),
-      name: 'Carousel',
-      children: [],
-    },
-    {
-      tag: 'el-carousel-item',
-      id: idGenerator(),
-      name: 'Carousel',
-      children: [],
-    },
-  ],
-}));
-
-ComponentFactory.register('block', 'Pagination', () => ({
-  id: idGenerator(),
-  name: 'Pagination',
-  tag: 'el-pagination',
-  props: {
-    total: 50,
-  },
-}));
+// ComponentFactory.register('block', 'Carousel', );
 
 ComponentFactory.register('block', 'Textarea', () => ({
   tag: 'dynamic-block',
   id: idGenerator(),
   name: 'Textarea',
-  category: 'block',
   props: {
     data: {
-      IS_COMP_ADDING: true,
       content: '',
     },
   },
@@ -291,7 +269,6 @@ ComponentFactory.register('form', 'Switch', () => {
           conf.children[0].props.value = event;
         },
       },
-      category: 'form',
       children: [],
     }],
   };
@@ -300,9 +277,18 @@ ComponentFactory.register('form', 'Switch', () => {
 });
 
 ComponentFactory.restoreSwitch = function (data) {
+  data.children[0].on = data.children[0].on || {};
   data.children[0].on.input = function (event) {
     console.log(data);
     data.children[0].props.value = event;
+  };
+};
+
+ComponentFactory.restoreDatePicker = function (data) {
+  console.log('++++++++++', data.on);
+  data.on = data.on || {};
+  data.on.input = function (e) {
+    data.props.value = e;
   };
 };
 
@@ -310,6 +296,9 @@ ComponentFactory.restore = function restore(compList) {
   for (let i = 0, l = compList.length; i < l; i++) {
     if (compList[i].name === 'Switch') {
       ComponentFactory.restoreSwitch(compList[i]);
+    }
+    if (compList[i].name === 'datepicker') {
+      // ComponentFactory.restoreDatePicker(compList[i]);
     }
   }
 

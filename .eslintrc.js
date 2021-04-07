@@ -1,3 +1,5 @@
+const OFF = 'off';
+
 module.exports = {
   root: true,
   env: {
@@ -13,5 +15,12 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'quote-props': 'off',
+    'import/prefer-default-export': 'off',
+    'arrow-body-style': 'off',
+    'no-param-reassign': 'off',
+    'no-eval': 'off',
+    'guard-for-in': OFF,
+    'no-restricted-syntax': OFF,
   },
 };

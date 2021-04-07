@@ -3,23 +3,28 @@
     <div class="menu"></div>
     <div class="panel">
       <div class="panel-header">
-        <h2>
-          Add Component
-        </h2>
+        <h2>Add Component</h2>
       </div>
       <!-- <div class="group-header">
         Layout
       </div> -->
       <el-collapse v-model="activeNames" @change="handleChange">
-        <el-collapse-item :title="grp.title" :name="k"
+        <el-collapse-item
+          :title="grp.title"
+          :name="k"
           v-for="(grp, k) in components"
-          :key="k">
+          :key="k"
+        >
           <div class="comp-list">
-            <div class="comp"
-                    :key="item.id"
-                    v-for="item in grp.items"
-                    :data-component-id="item.id"
-                    :data-component-cate="grp.type">{{ item.name }}</div>
+            <div
+              class="comp"
+              :key="item.id"
+              v-for="item in grp.items"
+              :data-component-id="item.id"
+              :data-component-cate="grp.type"
+            >
+              {{ item.name }}
+            </div>
           </div>
         </el-collapse-item>
       </el-collapse>
@@ -29,67 +34,78 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import Messenger from '../common/messenger';
+import Messenger from '../../common/messenger';
+
+const compTempList = [
+  {
+    type: 'layout',
+    title: '布局 Layout',
+    items: [
+      { name: 'Section', id: 'Section' },
+      { name: 'Container', id: 'Container' },
+      { name: 'Columns', id: 'Columns' },
+      { name: 'Flexs', id: 'Flexs' },
+    ],
+  },
+  {
+    type: 'component',
+    title: '组件工厂',
+    items: [
+      { name: 'Component', id: 'Component' },
+      // { name: 'Text', id: 'Text' },
+    ],
+  },
+  {
+    type: 'basic',
+    title: '基础 Basic',
+    items: [
+      { name: 'Tabs', id: 'Tabs' },
+      { name: 'Carousel', id: 'Carousel' },
+      { name: 'Pagination', id: 'Pagination' },
+    ],
+  },
+  {
+    type: 'block',
+    title: '组件 Component',
+    items: [
+      { name: 'List', id: 'List' },
+      { name: 'Textarea', id: 'Textarea' },
+      { name: 'Banner', id: 'Banner' },
+      { name: 'Footer', id: 'Footer' },
+    ],
+  },
+  {
+    type: 'form',
+    title: '表单 Form',
+    items: [
+      { name: '表单容器', id: 'Form' },
+      // { name: '单选框', id: 'Radio' },
+      { name: '开关', id: 'Switch' },
+    ],
+  },
+  {
+    type: 'thirdparty',
+    title: '外部 External',
+    items: [
+
+    ],
+  },
+];
 
 const msgr = new Messenger('#work-frame');
 /* eslint-disable */
 export default {
   data() {
+    const components = this.generateMenu(compTempList);
+
     return {
       mNode: null,
       componentToAdd: {
         id: '',
       },
-      activeNames: [0, 1, 2, 3],
+      activeNames: [0, 1, 2, 3, 4, 5],
       isDebugMNode: false,
-      components: [
-        {
-          type: 'layout',
-          title: '布局 Layout',
-          items: [
-            { name: 'Section', id: 'Section' },
-            { name: 'Container', id: 'Container' },
-            { name: 'Columns', id: 'Columns' },
-            { name: 'Flexs', id: 'Flexs' },
-          ]
-        },
-        {
-          type: 'component',
-          title: '组件工厂',
-          items: [
-            { name: 'Component', id: 'Component' },
-            // { name: 'Text', id: 'Text' },
-          ],
-        },
-        {
-          type: 'block',
-          title: '基础 Basic',
-          items: [
-            { name: 'Tabs', id: 'Tabs' },
-            { name: 'Carousel', id: 'Carousel' },
-            { name: 'Pagination', id: 'Pagination' },
-          ]
-        },
-        {
-          type: 'block',
-          title: '组件 Component',
-          items: [
-            { name: 'List', id: 'List' },
-            { name: 'Textarea', id: 'Textarea' },
-            { name: 'Banner', id: 'Banner' },
-            { name: 'Footer', id: 'Footer' },
-          ],
-        },
-        {
-          type: 'form',
-          title: '表单 Form',
-          items: [
-            { name: '表单容器', id: 'Form' },
-            // { name: '单选框', id: 'Radio' },
-            { name: '开关', id: 'Switch' },
-          ]
-        }
-      ],
+      components
     };
   },
   computed: {
@@ -98,6 +114,25 @@ export default {
     }),
   },
   methods: {
+    generateMenu(compList) {
+      const dirs = require.context('@/factory', true, /init\.js$/)
+      const externalComps = dirs.keys().map(item => {
+        const paths = item.split('/');
+        const type = paths[1];
+        const name = paths[2];
+        // return { name, id: name }
+        console.log(type)
+        const grp = compList.find(item => item.type === type);
+        if (grp) {
+          grp.items.push({
+            name: `*${name}`,
+            id: name,
+            thirdParty: true,
+          })
+        }
+      })
+      return compList;
+    },
     ...mapMutations(['hidePlaceholder', 'showPlaceholder']),
     handleChange(val) {
       console.log(val);

@@ -34,37 +34,10 @@
 <script>
 const propertyKey = 'events';
 
-const confMap = {
-  Pagination: {
-    'current-change': {
-      type: 'Function',
-      value: `function (val) {
-    this.tmpl.val = val;
-    this.$notify.info({
-        message: '当前页面' + val
-    });
-}`,
-    },
-    'prev-click': {
-      type: 'Function',
-    },
-    'next-click': {
-      type: 'Function',
-    },
-  },
-};
-
 function restorePreviousValue(target, source, confList) {
   // restore previous conf
-  // eslint-disable-next-line
-    for (const k in confList) {
+  for (const k in confList) {
     const val = source[propertyKey] && source[propertyKey][k];
-
-    // if (val) {
-
-    // }
-
-    // eslint-disable-next-line no-param-reassign
     target[k] = val !== undefined ? val : confList[k].default;
   }
   return target;
@@ -77,7 +50,12 @@ export default {
     },
   },
   data() {
-    const confList = confMap[this.data.name] || {};
+    let confList = {};
+    if (this.checkConfFileExisted()) {
+      confList = this.loadConfFromFile();
+    }
+
+    // const confList = confMap[this.data.name] || {};
     // used to modify comp.dataProvider
     const form = restorePreviousValue({}, this.data, confList);
 
@@ -92,29 +70,33 @@ export default {
     };
   },
   methods: {
-    // onConfChange(k, val) {
-    //   // eslint-disable-next-line
-    //   // console.log(arguments);
-    //   if (confList[k].type === Number || confList[k] === Number) {
-    //     // eslint-disable-next-line
-    //     val = val - 0;
-    //   }
-    //   if (confList[k].type === Array || confList[k] === Array) {
-    //     try {
-    //       // eslint-disable-next-line
-    //       val = eval(val);
-    //     } catch (e) {
-    //       console.log(e);
-    //     }
-    //   }
+    checkConfFileExisted() {
+      const dirs = require.context('@/factory', true, /editor\.js$/);
+      let moduleExisted = false;
+      dirs.keys().forEach((item) => {
+        const paths = item.split('/');
+        const type = paths[1];
+        const name = paths[2];
 
-    //   if (!this.data[propertyKey]) {
-    //     this.data[propertyKey] = {};
-    //   }
-
-    //   this.data[propertyKey][k] = val;
-    //   this.$emit('change');
-    // },
+        if (type === this.data.category && name === this.data.name) {
+          moduleExisted = true;
+        }
+      });
+      return moduleExisted;
+    },
+    loadConfFromFile() {
+      try {
+        // eslint-disable-next-line
+        const conf = require(`@/factory/${this.data.category}/${this.data.name}/editor.js`);
+        return conf.default.events;
+      } catch (e) {
+        console.log(e);
+      }
+      return false;
+    },
+    /**
+     * communication
+     */
     onDialogOpen(item, key) {
       // item.value;
       this.dialog.content = this.form[key] || item.value;

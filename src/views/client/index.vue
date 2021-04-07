@@ -7,9 +7,7 @@
 </template>
 
 <script>
-// import ComponentFactory from './dynamicComp/CompFactory';
-// import ComponentFactory from './dynamicComp/CompFactory';
-import CompRender from './dynamicComp/CompRender';
+import CompRender from './core/CompRender';
 
 export default {
   name: 'decoration',

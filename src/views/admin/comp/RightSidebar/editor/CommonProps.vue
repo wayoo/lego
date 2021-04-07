@@ -68,60 +68,6 @@
 </template>
 
 <script>
-// const propertyKey = 'props';
-const paginationConf = {
-  currentPage: {
-    type: Number,
-    default: 1,
-  },
-  pageSize: {
-    type: Number,
-    default: 10,
-  },
-  small: Boolean,
-  total: Number,
-  pageCount: Number,
-  pagerCount: {
-    type: Number,
-    validator(value) {
-      return (value || 0) === value && value > 4 && value < 22 && (value % 2) === 1;
-    },
-    default: 7,
-  },
-  // layout: {
-  //   default: 'prev, pager, next, jumper, ->, total',
-  // },
-  pageSizes: {
-    type: Array,
-    placeholder: '[10, 20, 30, 40, 50, 100]',
-    // default() {
-    //   return [10, 20, 30, 40, 50, 100];
-    // },
-  },
-  // popperClass: String,
-  prevText: String,
-  nextText: String,
-  background: Boolean,
-  disabled: Boolean,
-  // hideOnSinglePage: Boolean,
-};
-
-const confMap = {
-  Textarea: {
-    confKey: 'props.data.content',
-    confList: {
-      currentPage: {
-        type: Number,
-        default: 1,
-      },
-    },
-  },
-  Pagination: {
-    confKey: 'props',
-    confList: paginationConf,
-  },
-};
-
 function restorePreviousValue(target, source, confKey, confList) {
   // restore previous conf
   // eslint-disable-next-line
@@ -145,7 +91,18 @@ export default {
     },
   },
   data() {
-    const { confKey, confList } = confMap[this.data.name] || {};
+    const confKey = 'props';
+    let confList;
+    if (this.checkConfFileExisted()) {
+      const conf = this.loadConfFromFile();
+      // confKey = conf.confKey;
+      confList = conf;
+    } else {
+      // const conf = confMap[this.data.name] || {};
+      // confKey = conf.confKey;
+      // confList = conf;
+    }
+
     // used to modify comp.dataProvider
     const form = restorePreviousValue({}, this.data, confKey, confList);
     const propsBinds = this.data.propsBinds || {};
@@ -163,16 +120,42 @@ export default {
     };
   },
   methods: {
+    checkConfFileExisted() {
+      const dirs = require.context('@/factory', true, /editor\.js$/);
+      let moduleExisted = false;
+      dirs.keys().forEach((item) => {
+        const paths = item.split('/');
+        const type = paths[1];
+        const name = paths[2];
+
+        if (type === this.data.category && name === this.data.name) {
+          moduleExisted = true;
+        }
+      });
+      return moduleExisted;
+    },
+    loadConfFromFile() {
+      try {
+        // eslint-disable-next-line
+        const conf = require(`@/factory/${this.data.category}/${this.data.name}/editor.js`);
+        return conf.default.props;
+      } catch (e) {
+        console.log(e);
+      }
+      return false;
+    },
+    /**
+     * case 1
+     * set value directly
+     */
     onConfChange(k, val) {
       // eslint-disable-next-line
       // console.log(arguments);
       if (this.confList[k].type === Number || this.confList[k] === Number) {
-        // eslint-disable-next-line
-        val = val - 0;
+        val -= 0;
       }
       if (this.confList[k].type === Array || this.confList[k] === Array) {
         try {
-          // eslint-disable-next-line
           val = eval(val);
         } catch (e) {
           console.log(e);
@@ -191,8 +174,13 @@ export default {
       // unset
       delete this.data.propsBinds[k];
 
+      this.updateCompKeyIfNeeded(k);
       this.$emit('change');
     },
+    /**
+     * case 2
+     * bind value through expression
+     */
     onDialogOpen(item, key) {
       // item.value;
       this.dialog.value = this.propsBinds[key];
@@ -211,6 +199,15 @@ export default {
       this.$set(this.propsBinds, this.dialog.key, this.dialog.value);
       this.data.propsBinds[this.dialog.key] = this.dialog.value;
       this.$emit('change');
+    },
+    /**
+     * case end
+     */
+    updateCompKeyIfNeeded(k) {
+      const conf = this.confList[k];
+      if (conf && conf.forceUpdate) {
+        this.data.key = new Date() - 0;
+      }
     },
   },
 };
